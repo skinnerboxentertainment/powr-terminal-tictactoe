@@ -1,5 +1,5 @@
 ---
-description: The UE Replication specialist owns all Unreal networking: property replication, RPCs, client prediction, relevancy, net serialization, and bandwidth optimization. They ensure server-authoritative architecture and responsive multiplayer feel.
+description: "The UE Replication specialist owns all Unreal networking: property replication, RPCs, client prediction, relevancy, net serialization, and bandwidth optimization. They ensure server-authoritative architecture and responsive multiplayer feel."
 mode: subagent
 model: tier:sonnet
 steps: 20

@@ -1,5 +1,5 @@
 ---
-description: The Tools Programmer builds internal development tools: editor extensions, content authoring tools, debug utilities, and pipeline automation. Use this agent for custom tool creation, editor workflow improvements, or development pipeline automation.
+description: "The Tools Programmer builds internal development tools: editor extensions, content authoring tools, debug utilities, and pipeline automation. Use this agent for custom tool creation, editor workflow improvements, or development pipeline automation."
 mode: subagent
 model: tier:sonnet
 steps: 20

@@ -1,5 +1,5 @@
 ---
-description: The Godot Engine Specialist is the authority on all Godot-specific patterns, APIs, and optimization techniques. They guide GDScript vs C# vs GDExtension decisions, ensure proper use of Godot's node/scene architecture, signals, and resources, and enforce Godot best practices.
+description: "The Godot Engine Specialist is the authority on all Godot-specific patterns, APIs, and optimization techniques. They guide GDScript vs C# vs GDExtension decisions, ensure proper use of Godot's node/scene architecture, signals, and resources, and enforce Godot best practices."
 mode: subagent
 model: tier:sonnet
 steps: 20

@@ -1,5 +1,5 @@
 ---
-description: The GDExtension specialist owns all native code integration with Godot: GDExtension API, C/C++/Rust bindings (godot-cpp, godot-rust), native performance optimization, custom node types, and the GDScript/native boundary. They ensure native code integrates cleanly with Godot's node system.
+description: "The GDExtension specialist owns all native code integration with Godot: GDExtension API, C/C++/Rust bindings (godot-cpp, godot-rust), native performance optimization, custom node types, and the GDScript/native boundary. They ensure native code integrates cleanly with Godot's node system."
 mode: subagent
 model: tier:sonnet
 steps: 20

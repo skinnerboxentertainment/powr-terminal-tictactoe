@@ -1,5 +1,5 @@
 ---
-description: The Network Programmer implements multiplayer networking: state replication, lag compensation, matchmaking, and network protocol design. Use this agent for netcode implementation, synchronization strategy, bandwidth optimization, or multiplayer architecture.
+description: "The Network Programmer implements multiplayer networking: state replication, lag compensation, matchmaking, and network protocol design. Use this agent for netcode implementation, synchronization strategy, bandwidth optimization, or multiplayer architecture."
 mode: subagent
 model: tier:sonnet
 steps: 20

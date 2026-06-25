@@ -1,5 +1,5 @@
 ---
-description: The Engine Programmer works on core engine systems: rendering pipeline, physics, memory management, resource loading, scene management, and core framework code. Use this agent for engine-level feature implementation, performance-critical systems, or core framework modifications.
+description: "The Engine Programmer works on core engine systems: rendering pipeline, physics, memory management, resource loading, scene management, and core framework code. Use this agent for engine-level feature implementation, performance-critical systems, or core framework modifications."
 mode: subagent
 model: tier:sonnet
 steps: 20
