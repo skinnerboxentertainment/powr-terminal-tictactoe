@@ -206,6 +206,16 @@ public/                             # Static assets (HTML, favicon, etc.)
 Primary development and testing on **Windows 11** with PowerShell 7+.
 OpenCode is cross-platform (Windows, macOS, Linux).
 
+## Support My Work
+
+AutoMagically Built Games runs on [OpenCode](https://opencode.ai).
+If you're new to OpenCode, sign up through my referral link —
+you get **$5 credit**, and I earn **$5** too.
+
+👉 **[https://opencode.ai/go?ref=H0NH2RZJS1](https://opencode.ai/go?ref=H0NH2RZJS1)**
+
+Stars, forks, and sharing the project also help tremendously. Thank you.
+
 ## License
 
 MIT License. See [LICENSE](LICENSE) for details.

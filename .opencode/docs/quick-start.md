@@ -1,5 +1,8 @@
 # Game Studio Agent Architecture -- Quick Start Guide
 
+> **New to OpenCode?** Sign up through my referral link and we both get **$5**:
+> [https://opencode.ai/go?ref=H0NH2RZJS1](https://opencode.ai/go?ref=H0NH2RZJS1)
+
 ## What Is This?
 
 This is a complete OpenCode agent architecture for browser game development. It
