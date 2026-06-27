@@ -1,14 +1,13 @@
 ---
-description: Scaffold the test framework and CI/CD pipeline for the project's engine. Creates the tests/ directory structure, engine-specific test runner configuration, and GitHub Actions workflow. Run once during Technical Setup phase before the first sprint begins.
+description: Scaffold the test framework and CI/CD pipeline. Creates the tests/ directory structure, Vitest configuration, and GitHub Actions workflow. Run once during Technical Setup phase before the first sprint begins.
 agent: build
 ---
 
 # Test Setup
 
 This skill scaffolds the automated testing infrastructure for the project.
-It detects the configured engine, generates the appropriate test runner
-configuration, creates the standard directory layout, and wires up CI/CD
-so tests run on every push.
+It configures Vitest, creates the standard directory layout, and wires up
+GitHub Actions CI so tests run on every push.
 
 Run this once during the Technical Setup phase, before any implementation
 begins. A test framework installed at sprint start costs 30 minutes.
@@ -257,5 +256,5 @@ Verdict: **COMPLETE** — test framework scaffolded and CI/CD wired up.
   stop and redirect to `/setup-engine`. Do not guess.
 - **`force` flag skips the "already exists" early-exit but never overwrites.**
   It means "create any missing files even if the directory already exists."
-- For Unity CI, note that the `UNITY_LICENSE` secret must be configured
-  manually. Do not attempt to automate license management.
+- For CI, ensure `npm test` (Vitest) and `npx tsc --noEmit` are configured
+  in GitHub Actions. No license secrets needed for web-based testing.

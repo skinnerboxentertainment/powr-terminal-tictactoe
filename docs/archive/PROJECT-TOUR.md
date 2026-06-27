@@ -269,8 +269,8 @@ navigation tasks and produces exact results.
 │   ├── narrative-core.test.ts          # Vitest suite: 5 tests (schema, analysis, engine, events)
 │
 ├── .opencode/
-│   ├── agents/                         # 35 agent definitions
-│   ├── commands/                       # 73 commands
+│   ├── agents/                         # 36 agent definitions
+│   ├── commands/                       # 77 commands
 │   ├── rules/                          # 12 path-scoped rules
 │   ├── skills/
 │   │   └── typescript-patterns/        # TS patterns skill (loadable)

@@ -43,7 +43,7 @@ Note: in `solo` mode, director spawns (CD-PHASE-GATE, TD-PHASE-GATE, PR-PHASE-GA
 - **No argument**: Auto-detect current stage using the same heuristics as
   `/project-stage-detect`, then **confirm with the user before running**:
 
-  Use `AskUserQuestion`:
+  Use `question`:
   - Prompt: "Detected stage: **[current stage]**. Running gate for [Current] → [Next] transition. Is this correct?"
   - Options:
     - `[A] Yes — run this gate`
@@ -309,7 +309,7 @@ For items that can't be automatically verified, **ask the user**:
 
 (Review mode was resolved in Phase 1. Use that stored value here.)
 
-Before generating the final verdict, spawn all four directors as **parallel subagents** via Task using the parallel gate protocol from `.opencode/docs/director-gates.md`. Issue all four Task calls simultaneously — do not wait for one before starting the next.
+Before generating the final verdict, spawn all four directors as **parallel subagents** via task using the parallel gate protocol from `.opencode/docs/director-gates.md`. Issue all four Task calls simultaneously — do not wait for one before starting the next.
 
 **Spawn in parallel:**
 
@@ -440,7 +440,7 @@ echo -n "Production" > production/stage.txt
 
 ## 7. Closing Next-Step Widget
 
-After the verdict is presented and any stage.txt update is complete, close with a structured next-step prompt using `AskUserQuestion`.
+After the verdict is presented and any stage.txt update is complete, close with a structured next-step prompt using `question`.
 
 **Tailor the options to the gate that just ran:**
 

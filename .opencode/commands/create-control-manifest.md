@@ -108,7 +108,7 @@ Total rules extracted:
   - Global: [N] naming conventions, [M] forbidden APIs, [P] approved libraries
 ```
 
-Use `AskUserQuestion`:
+Use `question`:
 - Prompt: "Does this rule summary look complete?"
 - Options:
   - `[A] Yes — looks good, run the director review and write the manifest`
@@ -125,7 +125,7 @@ Use `AskUserQuestion`:
 - `lean` → skip. Note: "TD-MANIFEST skipped — Lean mode." Proceed to Phase 5.
 - `full` → spawn as normal.
 
-Spawn `technical-director` via Task using gate **TD-MANIFEST** (`.opencode/docs/director-gates.md`).
+Spawn `technical-director` via task using gate **TD-MANIFEST** (`.opencode/docs/director-gates.md`).
 
 Pass: the Control Manifest Preview from Phase 4 (rule counts per layer, full extracted rule list), the list of ADRs covered, engine version, and any rules sourced from technical-preferences.md or engine reference docs.
 
@@ -137,14 +137,14 @@ The technical-director reviews whether:
 
 Apply the verdict:
 - **APPROVE** → proceed to Phase 5
-- **CONCERNS** → surface via `AskUserQuestion` with options: `Revise flagged rules` / `Accept and proceed` / `Discuss further`
+- **CONCERNS** → surface via `question` with options: `Revise flagged rules` / `Accept and proceed` / `Discuss further`
 - **REJECT** → do not write the manifest; fix the flagged rules and re-present the summary
 
 ---
 
 ## 5. Write the Control Manifest
 
-Use `AskUserQuestion`:
+Use `question`:
 - Prompt: "May I write the Control Manifest?"
 - Options:
   - `[A] Yes — write to docs/architecture/control-manifest.md`

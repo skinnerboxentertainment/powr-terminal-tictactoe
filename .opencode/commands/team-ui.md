@@ -5,7 +5,7 @@ agent: build
 
 When this skill is invoked, orchestrate the UI team through a structured pipeline.
 
-**Decision Points:** At each phase transition, use `AskUserQuestion` to present
+**Decision Points:** At each phase transition, use `question` to present
 the user with the subagent's proposals as selectable options. Write the agent's
 full analysis in conversation, then capture the decision with concise labels.
 The user must approve before moving to the next phase.
@@ -40,12 +40,12 @@ Store the resolved mode for use in all subsequent phases.
 
 ## How to Delegate
 
-Use the Task tool to spawn each team member as a subagent:
-- `subagent_type: ux-designer` — User flows, wireframes, accessibility, input handling
-- `subagent_type: ui-programmer` — UI framework, screens, widgets, data binding
-- `subagent_type: art-director` — Visual style, layout polish, art bible consistency
-- `subagent_type: [UI engine specialist]` — Engine-specific UI pattern validation (e.g., unity-ui-specialist, ue-umg-specialist, godot-specialist)
-- `subagent_type: accessibility-specialist` — Accessibility compliance audit
+Use the task tool to spawn each team member as a subagent:
+- Spawn `ux-designer` — User flows, wireframes, accessibility, input handling
+- Spawn `ui-programmer` — UI framework, screens, widgets, data binding
+- Spawn `art-director` — Visual style, layout polish, art bible consistency
+- Spawn `[UI engine specialist]` — Engine-specific UI pattern validation (e.g., unity-ui-specialist, ue-umg-specialist, godot-specialist)
+- Spawn `accessibility-specialist` — Accessibility compliance audit
 
 Always provide full context in each agent's prompt (feature requirements, existing UI patterns, platform targets). Launch independent agents in parallel where the pipeline allows it (e.g., Phase 4 review agents can run simultaneously).
 
@@ -63,7 +63,7 @@ Before designing anything, read and synthesize:
 **If `design/ux/interaction-patterns.md` does not exist**, surface the gap immediately:
 > "interaction-patterns.md does not exist — no existing patterns to reuse."
 
-Then use `AskUserQuestion` with options:
+Then use `question` with options:
 - (a) Run `/ux-design patterns` first to establish the pattern library, then continue
 - (b) Proceed without the pattern library — ui-programmer will treat all patterns created as new and add each to a new `design/ux/interaction-patterns.md` at completion
 
@@ -87,7 +87,7 @@ Output: `design/ux/[feature-name].md` with all required spec sections filled.
 
 After the spec is complete, invoke `/ux-review design/ux/[feature-name].md`.
 
-**Gate**: Do not proceed to Phase 2 until the verdict is APPROVED. If the verdict is NEEDS REVISION, the ux-designer must address the flagged issues and re-run the review. The user may explicitly accept a NEEDS REVISION risk and proceed, but this must be a conscious decision — present the specific concerns via `AskUserQuestion` before asking whether to proceed.
+**Gate**: Do not proceed to Phase 2 until the verdict is APPROVED. If the verdict is NEEDS REVISION, the ux-designer must address the flagged issues and re-run the review. The user may explicitly accept a NEEDS REVISION risk and proceed, but this must be a conscious decision — present the specific concerns via `question` before asking whether to proceed.
 
 ### Phase 2: Visual Design
 
@@ -102,10 +102,10 @@ Delegate to **art-director**:
 ### Phase 3: Implementation
 
 Before implementation begins, spawn the **engine UI specialist** (from `.opencode/docs/technical-preferences.md` Engine Specialists → UI Specialist) to review the UX spec and visual design spec for engine-specific implementation guidance:
-- Which engine UI framework should be used for this screen? (e.g., UI Toolkit vs UGUI in Unity, Control nodes vs CanvasLayer in Godot, UMG vs CommonUI in Unreal)
-- Any engine-specific gotchas for the proposed layout or interaction patterns?
-- Recommended widget/node structure for the engine?
-- Output: engine UI implementation notes to hand off to ui-programmer before they begin
+- Should this screen use PixiJS scene-graph UI (Container/Sprite/Graphics) or DOM overlay (`pixi.js/dom`)?
+- Any browser-specific gotchas for the proposed layout or interaction patterns?
+- Recommended container/widget structure for PixiJS?
+- Output: UI implementation notes to hand off to ui-programmer before they begin
 
 If no engine is configured, skip this step.
 
@@ -145,29 +145,8 @@ All three review streams must report before proceeding to Phase 5.
 - `/team-ui [feature]` — Full pipeline from concept through polish (calls `/ux-design` and `/ux-review` internally)
 - `/quick-design` — Small UI changes that don't need a full new UX spec
 
-## Error Recovery Protocol
-
-If any spawned agent (via Task) returns BLOCKED, errors, or cannot complete:
-
-1. **Surface immediately**: Report "[AgentName]: BLOCKED — [reason]" to the user before continuing to dependent phases
-2. **Assess dependencies**: Check whether the blocked agent's output is required by subsequent phases. If yes, do not proceed past that dependency point without user input.
-3. **Offer options** via AskUserQuestion with choices:
-   - Skip this agent and note the gap in the final report
-   - Retry with narrower scope
-   - Stop here and resolve the blocker first
-4. **Always produce a partial report** — output whatever was completed. Never discard work because one agent blocked.
-
-Common blockers:
-- Input file missing (story not found, GDD absent) → redirect to the skill that creates it
-- ADR status is Proposed → do not implement; run `/architecture-decision` first
-- Scope too large → split into two stories via `/create-stories`
-- Conflicting instructions between ADR and story → surface the conflict, do not guess
-
-## File Write Protocol
-
-All file writes (UX specs, interaction pattern library updates, implementation files) are
-delegated to sub-agents and sub-skills (`/ux-design`, `ui-programmer`). Each enforces the
-"May I write to [path]?" protocol. This orchestrator does not write files directly.
+@.opencode/docs/shared-protocols.md#error-recovery-protocol
+@.opencode/docs/shared-protocols.md#file-write-protocol
 
 ## Output
 

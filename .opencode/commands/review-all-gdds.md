@@ -548,11 +548,11 @@ FAIL: One or more blocking issues must be resolved before architecture begins.
 
 ## Phase 6: Write Report and Flag GDDs
 
-Use `AskUserQuestion` for write permission:
+Use `question` for write permission:
 - Prompt: "May I write this review to `design/gdd/gdd-cross-review-[date].md`?"
 - Options: `[A] Yes — write the report` / `[B] No — skip`
 
-If any GDDs are flagged for revision, use a second `AskUserQuestion`:
+If any GDDs are flagged for revision, use a second `question`:
 - Prompt: "Should I update the systems index to mark these GDDs as needing revision? ([list of flagged GDDs])"
 - Options: `[A] Yes — update systems index` / `[B] No — leave as-is`
 - If yes: update each flagged GDD's Status field in systems-index.md to "Needs Revision".
@@ -582,7 +582,7 @@ Confirm in conversation: "Session state updated."
 
 ## Phase 7: Handoff
 
-After all file writes are complete, use `AskUserQuestion` for a closing widget.
+After all file writes are complete, use `question` for a closing widget.
 
 Before building options, check project state:
 - Are there any Warning-level items that are simple edits (flagged with "30-second edit", "brief addition", or similar)? → offer inline quick-fix option
@@ -612,7 +612,7 @@ If any spawned agent returns BLOCKED, errors, or fails to complete:
 
 1. **Surface immediately**: Report "[AgentName]: BLOCKED — [reason]" before continuing
 2. **Assess dependencies**: If the blocked agent's output is required by a later phase, do not proceed past that phase without user input
-3. **Offer options** via AskUserQuestion with three choices:
+3. **Offer options** via question with three choices:
    - Skip this agent and note the gap in the final report
    - Retry with narrower scope (fewer GDDs, single-system focus)
    - Stop here and resolve the blocker first

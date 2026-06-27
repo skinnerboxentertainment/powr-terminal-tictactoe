@@ -60,7 +60,4 @@ All stories must have appropriate test evidence before they can be marked Done:
 - Automated test suite runs on every push to main and every PR
 - No merge if tests fail — tests are a blocking gate in CI
 - Never disable or skip failing tests to make CI pass — fix the underlying issue
-- Engine-specific CI commands:
-  - **Godot**: `godot --headless --script tests/gdunit4_runner.gd`
-  - **Unity**: `game-ci/unity-test-runner@v4` (GitHub Actions)
-  - **Unreal**: headless runner with `-nullrhi` flag
+- CI runs: `npm test` (Vitest), `npx tsc --noEmit`

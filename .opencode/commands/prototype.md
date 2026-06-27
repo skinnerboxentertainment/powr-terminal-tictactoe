@@ -31,7 +31,7 @@ Resolve the review mode (once, store for all gate spawns this run):
 **Check for spike mode:** If `--spike` was passed, skip to the **Spike Mode** section
 at the bottom of this skill.
 
-Otherwise, use `AskUserQuestion` to confirm intent before proceeding:
+Otherwise, use `question` to confirm intent before proceeding:
 
 - **Prompt**: "How would you like to use this prototype session?"
 - **Options**:
@@ -173,15 +173,11 @@ Reframe the hypothesis and simplify aggressively, or switch to Paper path.
 
 **Output:** A minimal runnable engine project in `prototypes/[name]-concept/`.
 
-**Lighter alternative — Love2D (Lua):** If the project engine (Godot, Unity, Unreal)
-feels too heavy to stand up for a throwaway build, consider Love2D — a minimal 2D
-framework that installs in minutes, requires no project scaffolding, and renders
-natively with no browser latency. Used by many indie devs for rapid 2D action and
-platformer prototypes (Balatro prototyped in Love2D; Nuclear Throne's early builds
-used it). It sits between HTML overhead and full engine overhead: heavier than
-opening a browser, lighter than setting up a full engine project. Best for 2D
-action/platformer feel validation when the project engine is 3D-first or takes
-significant time to configure.
+**Lighter alternative — Love2D (Lua):** If this feels too heavy for a throwaway
+build, consider Love2D — a minimal 2D framework that installs in minutes. Used by
+many indie devs for rapid 2D action and platformer prototypes (Balatro prototyped
+in Love2D; Nuclear Throne's early builds used it). Best for 2D action/platformer
+feel validation when you need to iterate faster than a full PixiJS setup.
 
 ---
 
@@ -210,8 +206,8 @@ cannot tell you whether jumping feels right or whether explosions feel satisfyin
 **Narrative tools for this path:** For dialogue-heavy and story-driven games, skip the
 generic rules doc — use a dedicated narrative scripting tool instead:
 - **Twine** — zero-code hypertext fiction; ideal for branching structure experiments and choice-impact testing
-- **Ink** (Inkle) — plain-text scripting language used in *80 Days*, *Heaven's Vault*, and *Overboard*; exports directly to Unity and Godot
-- **Yarn Spinner** — dialogue scripting used in *A Short Hike*, *DREDGE*, and *Night in the Woods*; integrates natively with Unity and Godot
+- **Ink** (Inkle) — plain-text scripting language used in *80 Days*, *Heaven's Vault*, and *Overboard*
+- **Yarn Spinner** — dialogue scripting used in *A Short Hike*, *DREDGE*, and *Night in the Woods*
 
 All three let you write and playtest branching dialogue in minutes. Key metric for
 narrative prototypes: **time to first emotional beat** — how many exchanges before
@@ -219,7 +215,7 @@ the player feels something? If it takes more than 3-4 exchanges, the opening is 
 
 ---
 
-Assess which path best fits the hypothesis, then use `AskUserQuestion` with your
+Assess which path best fits the hypothesis, then use `question` with your
 recommendation pre-stated:
 
 - **Prompt**: "Which prototype path would you like to use? (Based on your concept, I'd recommend [path] — [one sentence reason].)"
@@ -409,7 +405,7 @@ is the project's complete history of what was tried and what was learned.
 **Review mode check:**
 - `solo` → skip. Note: "CD-PLAYTEST skipped — Solo mode."
 - `lean` → skip. Note: "CD-PLAYTEST skipped — Lean mode."
-- `full` → spawn `creative-director` via Task using gate **CD-PLAYTEST** if
+- `full` → spawn `creative-director` via task using gate **CD-PLAYTEST** if
   `design/gdd/game-concept.md` exists with game pillars defined. If pillars are
   not yet defined, note: "CD-PLAYTEST skipped — game pillars not yet defined at
   concept prototype stage."
@@ -513,7 +509,7 @@ gate implications. Hard cap: ~4 hours.
 
 1. **Define the spike question** (plain text, not a widget): "What specific question does this spike answer? Give me one sentence: 'Can we [do X] using [approach Y]?'"
 
-2. **Choose path** — same AskUserQuestion widget as Phase 3 (HTML / Engine / Paper).
+2. **Choose path** — same question widget as Phase 3 (HTML / Engine / Paper).
 
 3. **Scope** — maximum 2-3 bullet points. One mechanic, one technical question, nothing else.
 

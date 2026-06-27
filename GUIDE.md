@@ -1,6 +1,6 @@
 # OpenCode PixiJS Game Studio -- Game Studio Agent Architecture
 
-Indie game development managed through 35 coordinated OpenCode agents.
+Indie game development managed through 36 coordinated OpenCode agents.
 Each agent owns a specific domain, enforcing separation of concerns and quality.
 
 ## Technology Stack

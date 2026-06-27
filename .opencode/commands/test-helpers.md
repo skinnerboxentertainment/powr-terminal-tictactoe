@@ -83,12 +83,6 @@ export function expectNonNullable<T>(value: T | null | undefined, label = "value
   expect(value, `Expected ${label} to be non-nullable`).not.toBeUndefined()
 }
 ```
-##
-## Usage:
-##   var assert = GameAssertions.new()
-##   assert.health_in_range(entity, 0, entity.max_health)
-
-```
 
 **Factory helper** (`tests/helpers/factories.ts`):
 

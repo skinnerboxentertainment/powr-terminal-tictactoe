@@ -1,6 +1,6 @@
 # OpenCode PixiJS Game Studio — Game Studio Agent Architecture
 
-Indie game development managed through 35 coordinated OpenCode agents.
+Indie game development managed through 36 coordinated OpenCode agents.
 Each agent owns a specific domain, enforcing separation of concerns and quality.
 
 This is a PixiJS v8 + TypeScript derivative of [OpenCode Game Studios](https://github.com/Donchitos/Claude-Code-Game-Studios)
@@ -23,7 +23,7 @@ Set in `opencode.json`:
 }
 ```
 
-## Agents (35)
+## Agents (36)
 
 Defined in `.opencode/agents/` as markdown files with YAML frontmatter.
 - **Tier 1 — Directors** (opencode-go/deepseek-v4-pro): creative-director, technical-director, producer
@@ -32,10 +32,11 @@ Defined in `.opencode/agents/` as markdown files with YAML frontmatter.
 
 Invoke agents with `@agent-name` in your message.
 
-## Commands (73)
+## Commands (77)
 
-All skills from CCGS are available as commands in `.opencode/commands/`.
+All commands are in `.opencode/commands/`.
 Type `/command-name` in the TUI to use them:
+- `/auto-build` — Generate a complete working build from a text spec
 - `/start` — First-time onboarding
 - `/brainstorm` — Explore game ideas
 - `/setup-engine` — Configure engine
@@ -86,7 +87,7 @@ Configured in `.opencode/docs/technical-preferences.md`:
 - **Physics**: Matter.js (optional)
 - **Audio**: Howler.js (optional)
 
-> PixiJS skills available: `npx skills add https://github.com/pixijs/pixijs-skills`
+> Skills installed: 26 PixiJS v8 reference skills + 4 project architecture skills (`automagically-game-architecture`, `automagically-testing`, `automagically-audio`, `automagically-assets-and-build`) + 7 process skills (`diagnosing-bugs`, `prototype`, `tdd`, `writing-great-skills`, `grill-with-docs`, `handoff`, `improve-codebase-architecture`) + `playwright-best-practices`
 
 ## Project Structure
 
@@ -114,5 +115,6 @@ CCGS hooks are not directly supported in OpenCode. Instead:
 
 ## First Session?
 
-If the project has no engine configured and no game concept, type `/start` to begin.
+If you have a game idea, type `/auto-build "your game description"` to get a running build immediately.
+If you have no idea yet, type `/start` for guided onboarding.
 

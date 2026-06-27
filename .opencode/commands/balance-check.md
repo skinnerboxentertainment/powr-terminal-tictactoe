@@ -96,7 +96,7 @@ Run domain-specific checks:
 
 ## Phase 6: Fix & Verify Cycle
 
-After presenting the report, use `AskUserQuestion`:
+After presenting the report, use `question`:
 - Prompt: "Balance check complete. What would you like to do next?"
 - Options:
   - `[A] Fix highest-priority issue now — walk me through it`

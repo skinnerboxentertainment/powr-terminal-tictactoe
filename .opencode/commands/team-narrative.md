@@ -4,11 +4,11 @@ agent: build
 ---
 
 If no argument is provided, output usage guidance and exit without spawning any agents:
-> Usage: `/team-narrative [narrative content description]` — describe the story content, scene, or narrative area to work on (e.g., `boss encounter cutscene`, `faction intro dialogue`, `tutorial narrative`). Do not use `AskUserQuestion` here; output the guidance directly.
+> Usage: `/team-narrative [narrative content description]` — describe the story content, scene, or narrative area to work on (e.g., `boss encounter cutscene`, `faction intro dialogue`, `tutorial narrative`). Output the guidance directly — no question widget needed for the usage case.
 
 When this skill is invoked with an argument, orchestrate the narrative team through a structured pipeline.
 
-**Decision Points:** At each phase transition, use `AskUserQuestion` to present
+**Decision Points:** At each phase transition, use a question widget to present
 the user with the subagent's proposals as selectable options. Write the agent's
 full analysis in conversation, then capture the decision with concise labels.
 The user must approve before moving to the next phase.
@@ -36,13 +36,13 @@ Store the resolved mode for use in all subsequent phases.
 
 ## How to Delegate
 
-Use the Task tool to spawn each team member as a subagent:
-- `subagent_type: narrative-director` — Story arcs, character design, narrative vision
-- `subagent_type: writer` — Dialogue writing, lore entries, in-game text
-- `subagent_type: world-builder` — World rules, faction design, history, geography
-- `subagent_type: art-director` — Character visual profiles, environmental visual storytelling, cinematic tone
-- `subagent_type: level-designer` — Level layouts that serve the narrative, pacing
-- `subagent_type: localization-lead` — Localization readiness — flags non-localizable strings, cultural assumptions, and i18n gaps
+Use the task tool to spawn each team member as a subagent:
+- Spawn `narrative-director` — Story arcs, character design, narrative vision
+- Spawn `writer` — Dialogue writing, lore entries, in-game text
+- Spawn `world-builder` — World rules, faction design, history, geography
+- Spawn `art-director` — Character visual profiles, environmental visual storytelling, cinematic tone
+- Spawn `level-designer` — Level layouts that serve the narrative, pacing
+- Spawn `localization-lead` — Localization readiness — flags non-localizable strings, cultural assumptions, and i18n gaps
 
 Always provide full context in each agent's prompt (narrative brief, lore dependencies, character profiles). Launch independent agents in parallel where the pipeline allows it (e.g., Phase 2 agents can run simultaneously).
 
@@ -82,29 +82,8 @@ Delegate in parallel:
 - **localization-lead**: Validate i18n compliance — check string key naming conventions, flag any strings with hardcoded formatting that won't survive translation, verify character limit headroom for languages that expand (German/Finnish typically +30%), confirm no cultural assumptions in text that would need locale-specific variants
 - **world-builder**: Finalize canon levels for all new lore entries
 
-## Error Recovery Protocol
-
-If any spawned agent (via Task) returns BLOCKED, errors, or cannot complete:
-
-1. **Surface immediately**: Report "[AgentName]: BLOCKED — [reason]" to the user before continuing to dependent phases
-2. **Assess dependencies**: Check whether the blocked agent's output is required by subsequent phases. If yes, do not proceed past that dependency point without user input.
-3. **Offer options** via AskUserQuestion with choices:
-   - Skip this agent and note the gap in the final report
-   - Retry with narrower scope
-   - Stop here and resolve the blocker first
-4. **Always produce a partial report** — output whatever was completed. Never discard work because one agent blocked.
-
-Common blockers:
-- Input file missing (story not found, GDD absent) → redirect to the skill that creates it
-- ADR status is Proposed → do not implement; run `/architecture-decision` first
-- Scope too large → split into two stories via `/create-stories`
-- Conflicting instructions between ADR and story → surface the conflict, do not guess
-
-## File Write Protocol
-
-All file writes (narrative docs, dialogue files, lore entries) are delegated to
-sub-agents spawned via Task. Each sub-agent enforces the "May I write to [path]?"
-protocol. This orchestrator does not write files directly.
+@.opencode/docs/shared-protocols.md#error-recovery-protocol
+@.opencode/docs/shared-protocols.md#file-write-protocol
 
 ## Output
 

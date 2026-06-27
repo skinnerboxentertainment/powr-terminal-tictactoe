@@ -13,7 +13,7 @@ Read the bug description or ID. Assess severity using these criteria:
 - **S2 (Major)**: Significant feature broken, workaround exists
 - **S3 or lower**: Minor issue — normal bug fix workflow applies
 
-Confirm with `AskUserQuestion`:
+Confirm with `question`:
 - Prompt: "I've assessed this as **[assessed severity]** — [brief rationale]. Confirm severity to proceed:"
 - Options:
   - `[A] S1 (Critical) — game unplayable, data loss, or security issue`
@@ -70,7 +70,7 @@ Check whether this is a git repository:
 
 If this command fails or returns empty: note "Not a git repository — create the branch manually." and skip branch creation.
 
-If the check passes, use `AskUserQuestion` before creating the branch:
+If the check passes, use `question` before creating the branch:
 - Prompt: "Ready to create hotfix branch 'hotfix/[short-name]' from [base-ref]?"
 - Options:
   - `[A] Yes — create branch`
@@ -93,11 +93,11 @@ Update the hotfix record with root cause, fix details, and test results.
 
 ## Phase 5: Collect Approvals
 
-Use the Task tool to request sign-off in parallel:
+Use the task tool to request sign-off in parallel:
 
-- `subagent_type: lead-programmer` — Review the fix for correctness and side effects
-- `subagent_type: qa-tester` — Run targeted regression tests on the affected system
-- `subagent_type: producer` — Approve deployment timing and communication plan
+- Spawn `lead-programmer` — Review the fix for correctness and side effects
+- Spawn `qa-tester` — Run targeted regression tests on the affected system
+- Spawn `producer` — Approve deployment timing and communication plan
 
 All three must return APPROVE before proceeding. If any returns CONCERNS or REJECT, do not deploy — surface the issue and resolve it first.
 
@@ -105,7 +105,7 @@ All three must return APPROVE before proceeding. If any returns CONCERNS or REJE
 
 ## Phase 5b: QA Re-Entry Gate
 
-After approvals, determine the QA scope required before deploying the hotfix. Spawn `qa-lead` via Task with:
+After approvals, determine the QA scope required before deploying the hotfix. Spawn `qa-lead` via task with:
 - The hotfix description and affected system
 - The regression test results from Phase 5
 - A list of all systems that touch the changed files (use Grep to find callers)
@@ -168,7 +168,7 @@ If STILL PRESENT: the hotfix failed — immediately re-open, assess rollback, an
 
 Schedule a post-incident review within 48 hours using `/retrospective hotfix`.
 
-Use `AskUserQuestion`:
+Use `question`:
 - Prompt: "Hotfix complete. What's the next step?"
 - Options:
   - `[A] Run /smoke-check to verify the fix`

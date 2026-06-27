@@ -175,7 +175,7 @@ Ask: "May I write this translator brief to `production/localization/translator-b
 
 ## Phase 2F: Cultural Review Mode
 
-Spawn `localization-lead` via Task. Ask them to audit the following for cultural sensitivity across the target locales (read from `assets/data/strings/` and `assets/`):
+Spawn `localization-lead` via task. Ask them to audit the following for cultural sensitivity across the target locales (read from `assets/data/strings/` and `assets/`):
 
 ### Content Areas to Review
 
@@ -275,7 +275,7 @@ just translating text. This mode validates the implementation.
 Read `.opencode/docs/technical-preferences.md` to determine the engine. Then check:
 
 **Layout mirroring**
-- Is RTL layout enabled in the engine? (Godot: `Control.layout_direction`, Unity: `RTL Support` package, Unreal: text direction flags)
+- Is RTL layout enabled? (Check DOM `dir="rtl"` for HTML overlay, or PixiJS text mirroring)
 - Are all UI containers set to auto-mirror, or are positions hardcoded?
 - Do progress bars, health bars, and directional indicators mirror correctly?
 
@@ -327,7 +327,7 @@ Pre-Freeze Checklist
 [ ] Marketing strings (store description, achievements) are final
 ```
 
-Use `AskUserQuestion`:
+Use `question`:
 - Prompt: "Are all items above confirmed? Calling string freeze locks the source table."
 - Options: `[A] Yes — call string freeze now` / `[B] No — I still have strings to add`
 
@@ -362,7 +362,7 @@ Localization QA is a dedicated pass that runs after translations are delivered b
 before any locale ships. This is not the same as `/validate` (which checks completeness)
 — this is a structured playthrough-based quality check.
 
-Spawn `localization-lead` via Task with:
+Spawn `localization-lead` via task with:
 - The target locale(s) to QA
 - The list of all screens/flows in the game (from `design/gdd/` or `/content-audit` output)
 - The current `/localize validate` report

@@ -21,6 +21,11 @@ phases:
     description: "Develop your game idea into a documented concept"
     next_phase: systems-design
     steps:
+      - id: auto-build
+        name: "Auto-Build Prototype"
+        command: /auto-build
+        required: false
+        description: "Generate a complete working build from a text description. Bypasses all gates — one command to a playable canvas. Use for rapid prototyping or when you want to see pixels before planning."
       - id: brainstorm
         name: "Brainstorm"
         command: /brainstorm

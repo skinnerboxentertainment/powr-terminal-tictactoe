@@ -225,21 +225,20 @@ Validates structure and completeness before you proceed.
 Or with a specific engine:
 
 ```
-/setup-engine godot 4.6
+/setup-engine
 ```
 
 **What /setup-engine does:**
 
 - Populates `.opencode/docs/technical-preferences.md` with naming conventions,
-  performance budgets, and engine-specific defaults
-- Detects knowledge gaps (engine version newer than LLM training data) and
-  advises cross-referencing `docs/engine-reference/`
-- Creates version-pinned reference docs in `docs/engine-reference/`
+  performance budgets, and project defaults
+- Detects knowledge gaps (PixiJS version newer than LLM training data) and
+  advises cross-referencing `.opencode/docs/pixijs-reference/`
+- Creates version-pinned reference docs in `.opencode/docs/pixijs-reference/`
 
-**Why this matters:** Once you set the engine, the system knows which
-engine-specialist agents to use. If you pick Godot, agents like
-`godot-specialist`, `godot-gdscript-specialist`, and `godot-shader-specialist`
-become your go-to experts.
+**Why this matters:** Once you set up the engine, the system knows which
+specialists to use. `pixijs-specialist` becomes the go-to expert for
+rendering, scene graph, and performance questions.
 
 ### Step 1.4: Decompose Your Concept Into Systems
 
@@ -1220,14 +1219,7 @@ Tier 3 (Specialists):  gameplay-programmer, engine-programmer,
                        qa-tester, performance-analyst, devops-engineer,
                        analytics-engineer, accessibility-specialist,
                        live-ops-designer, prototyper, security-engineer,
-                       community-manager, godot-specialist,
-                       godot-gdscript-specialist, godot-shader-specialist,
-                       godot-csharp-specialist, godot-gdextension-specialist,
-                       unity-specialist, unity-dots-specialist,
-                       unity-shader-specialist, unity-addressables-specialist,
-                       unity-ui-specialist, unreal-specialist,
-                       ue-blueprint-specialist, ue-gas-specialist,
-                       ue-replication-specialist, ue-umg-specialist
+                        community-manager, pixijs-specialist
 ```
 
 **Coordination rules:**
@@ -1383,20 +1375,7 @@ Reads existing code and generates GDD-format design documentation from it.
 | Prototype quickly | `prototyper` | 3 |
 | Audit security | `security-engineer` | 3 |
 | Communicate with players | `community-manager` | 3 |
-| Godot-specific help | `godot-specialist` | 3 |
-| GDScript-specific help | `godot-gdscript-specialist` | 3 |
-| Godot shader help | `godot-shader-specialist` | 3 |
-| GDExtension modules | `godot-gdextension-specialist` | 3 |
-| Unity-specific help | `unity-specialist` | 3 |
-| Unity DOTS/ECS | `unity-dots-specialist` | 3 |
-| Unity shaders/VFX | `unity-shader-specialist` | 3 |
-| Unity Addressables | `unity-addressables-specialist` | 3 |
-| Unity UI Toolkit | `unity-ui-specialist` | 3 |
-| Unreal-specific help | `unreal-specialist` | 3 |
-| Unreal GAS | `ue-gas-specialist` | 3 |
-| Unreal Blueprints | `ue-blueprint-specialist` | 3 |
-| Unreal replication | `ue-replication-specialist` | 3 |
-| Unreal UMG/CommonUI | `ue-umg-specialist` | 3 |
+| PixiJS rendering | `pixijs-specialist` | 3 |
 
 ### Agent Hierarchy
 
@@ -1422,7 +1401,7 @@ conflicts go to `producer`.
 
 ## Appendix B: Slash Command Quick-Reference
 
-### All 73 Commands by Category
+### All 77 Commands by Category
 
 #### Onboarding and Navigation (6)
 

@@ -9,7 +9,7 @@ Then stop immediately without spawning any subagents or reading any files.
 
 When this skill is invoked with a valid argument, orchestrate the combat team through a structured pipeline.
 
-**Decision Points:** At each phase transition, use `AskUserQuestion` to present
+**Decision Points:** At each phase transition, use `question` to present
 the user with the subagent's proposals as selectable options. Write the agent's
 full analysis in conversation, then capture the decision with concise labels.
 The user must approve before moving to the next phase.
@@ -38,14 +38,14 @@ Store the resolved mode for use in all subsequent phases.
 
 ## How to Delegate
 
-Use the Task tool to spawn each team member as a subagent:
-- `subagent_type: game-designer` — Design the mechanic, define formulas and edge cases
-- `subagent_type: gameplay-programmer` — Implement the core gameplay code
-- `subagent_type: ai-programmer` — Implement NPC/enemy AI behavior
-- `subagent_type: technical-artist` — Create VFX, shader effects, visual feedback
-- `subagent_type: sound-designer` — Define audio events, impact sounds, ambient audio
-- `subagent_type: [primary engine specialist]` — Engine idiom validation for architecture and implementation
-- `subagent_type: qa-tester` — Write test cases and validate implementation
+Use the task tool to spawn each team member as a subagent:
+- Spawn `game-designer` — Design the mechanic, define formulas and edge cases
+- Spawn `gameplay-programmer` — Implement the core gameplay code
+- Spawn `ai-programmer` — Implement NPC/enemy AI behavior
+- Spawn `technical-artist` — Create VFX, shader effects, visual feedback
+- Spawn `sound-designer` — Define audio events, impact sounds, ambient audio
+- Spawn `[primary engine specialist]` — Engine idiom validation for architecture and implementation
+- Spawn `qa-tester` — Write test cases and validate implementation
 
 Always provide full context in each agent's prompt (design doc path, relevant code files, constraints). Launch independent agents in parallel where the pipeline allows it (e.g., Phase 3 agents can run simultaneously).
 
@@ -64,12 +64,12 @@ Delegate to **gameplay-programmer** (with **ai-programmer** if AI is involved):
 - Output: architecture sketch with file list and interface definitions
 
 Then spawn the **primary engine specialist** to validate the proposed architecture:
-- Is the class/node/component structure idiomatic for the pinned engine? (e.g., Godot node hierarchy, Unity MonoBehaviour vs DOTS, Unreal Actor/Component design)
+- Is the class/component structure idiomatic for PixiJS v8? (e.g., Container tree, Sprite/Graphics composition, event-driven updates)
 - Are there engine-native systems that should be used instead of custom implementations?
 - Any proposed APIs that are deprecated or changed in the pinned engine version?
 - Output: engine architecture notes — incorporate into the architecture before Phase 3 begins
 
-Use `AskUserQuestion`:
+Use `question`:
 - Prompt: "Architecture sketch complete. Approve to proceed with parallel implementation."
 - Options:
   - `[A] Proceed — spawn implementation agents (gameplay-programmer, ai-programmer, technical-artist, sound-designer)`
@@ -102,29 +102,8 @@ Delegate to **qa-tester**:
 - Report feature status: COMPLETE / NEEDS WORK / BLOCKED
 - List any outstanding issues and their assigned owners
 
-## Error Recovery Protocol
-
-If any spawned agent (via Task) returns BLOCKED, errors, or cannot complete:
-
-1. **Surface immediately**: Report "[AgentName]: BLOCKED — [reason]" to the user before continuing to dependent phases
-2. **Assess dependencies**: Check whether the blocked agent's output is required by subsequent phases. If yes, do not proceed past that dependency point without user input.
-3. **Offer options** via AskUserQuestion with choices:
-   - Skip this agent and note the gap in the final report
-   - Retry with narrower scope
-   - Stop here and resolve the blocker first
-4. **Always produce a partial report** — output whatever was completed. Never discard work because one agent blocked.
-
-Common blockers:
-- Input file missing (story not found, GDD absent) → redirect to the skill that creates it
-- ADR status is Proposed → do not implement; run `/architecture-decision` first
-- Scope too large → split into two stories via `/create-stories`
-- Conflicting instructions between ADR and story → surface the conflict, do not guess
-
-## File Write Protocol
-
-All file writes (design documents, implementation files, test cases) are
-delegated to sub-agents spawned via Task. Each sub-agent enforces the
-"May I write to [path]?" protocol. This orchestrator does not write files directly.
+@.opencode/docs/shared-protocols.md#error-recovery-protocol
+@.opencode/docs/shared-protocols.md#file-write-protocol
 
 ## Output
 

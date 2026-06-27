@@ -9,8 +9,8 @@
 ├── vite.config.ts               # Vite dev server + build
 ├── index.html                   # Entry point HTML
 ├── .opencode/                   # Agent definitions, commands, rules, docs
-│   ├── agents/                  # 35 agent definitions
-│   ├── commands/                # 73 commands
+│   ├── agents/                  # 36 agent definitions
+│   ├── commands/                # 77 commands
 │   ├── rules/                   # 12 path-scoped coding standards
 │   └── docs/
 │       ├── pixijs-reference/    # PixiJS v8 version reference

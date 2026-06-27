@@ -5,7 +5,7 @@ agent: build
 
 When this skill is invoked:
 
-**Decision Points:** At each step transition, use `AskUserQuestion` to present
+**Decision Points:** At each step transition, use `question` to present
 the user with the subagent's proposals as selectable options. Write the agent's
 full analysis in conversation, then capture the decision with concise labels.
 The user must approve before moving to the next step.
@@ -35,14 +35,14 @@ Store the resolved mode for use in all subsequent phases.
 
 ## How to Delegate
 
-Use the Task tool to spawn each team member as a subagent:
-- `subagent_type: narrative-director` — Narrative purpose, characters, emotional arc
-- `subagent_type: world-builder` — Lore context, environmental storytelling, world rules
-- `subagent_type: level-designer` — Spatial layout, pacing, encounters, navigation
-- `subagent_type: systems-designer` — Enemy compositions, loot tables, difficulty balance
-- `subagent_type: art-director` — Visual theme, color palette, lighting, asset requirements
-- `subagent_type: accessibility-specialist` — Navigation clarity, colorblind safety, cognitive load
-- `subagent_type: qa-tester` — Test cases, boundary testing, playtest checklist
+Use the task tool to spawn each team member as a subagent:
+- Spawn `narrative-director` — Narrative purpose, characters, emotional arc
+- Spawn `world-builder` — Lore context, environmental storytelling, world rules
+- Spawn `level-designer` — Spatial layout, pacing, encounters, navigation
+- Spawn `systems-designer` — Enemy compositions, loot tables, difficulty balance
+- Spawn `art-director` — Visual theme, color palette, lighting, asset requirements
+- Spawn `accessibility-specialist` — Navigation clarity, colorblind safety, cognitive load
+- Spawn `qa-tester` — Test cases, boundary testing, playtest checklist
 
 Always provide full context in each agent's prompt (game concept, pillars, existing level docs, narrative docs).
 
@@ -71,7 +71,7 @@ Spawn the `art-director` agent to:
 
 **The art-director's visual targets from Step 1 must be passed to the level-designer in Step 2** as explicit constraints. Layout decisions happen within the visual direction, not before it.
 
-**Gate**: Use `AskUserQuestion` to present all three Step 1 outputs (narrative brief, lore foundation, visual direction targets) and confirm before proceeding to Step 2.
+**Gate**: Use `question` to present all three Step 1 outputs (narrative brief, lore foundation, visual direction targets) and confirm before proceeding to Step 2.
 
 ### Step 2: Layout and Encounter Design (level-designer)
 Spawn the `level-designer` agent with the full Step 1 output as context:
@@ -90,13 +90,13 @@ The level-designer should:
 **Adjacent area dependency check**: After the layout is produced, check `design/levels/` for each adjacent area referenced by the level-designer. If any referenced area's `.md` file does not exist, surface the gap:
 > "Level references [area-name] as an adjacent area but `design/levels/[area-name].md` does not exist."
 
-Use `AskUserQuestion` with options:
+Use `question` with options:
 - (a) Proceed with a placeholder reference — mark the connection as UNRESOLVED in the level doc and list it in the open cross-level dependencies section of the summary report
 - (b) Pause and run `/team-level [area-name]` first to establish that area
 
 Do NOT invent content for the missing adjacent area.
 
-**Gate**: Use `AskUserQuestion` to present Step 2 layout (including any unresolved adjacent area dependencies) and confirm before proceeding to Step 3.
+**Gate**: Use `question` to present Step 2 layout (including any unresolved adjacent area dependencies) and confirm before proceeding to Step 3.
 
 ### Step 3: Systems Integration (systems-designer)
 Spawn the `systems-designer` agent to:
@@ -106,7 +106,7 @@ Spawn the `systems-designer` agent to:
 - Design any area-specific mechanics or environmental hazards
 - Specify resource distribution (health pickups, save points, shops)
 
-**Gate**: Use `AskUserQuestion` to present Step 3 outputs and confirm before proceeding to Step 4.
+**Gate**: Use `question` to present Step 3 outputs and confirm before proceeding to Step 4.
 
 ### Step 4: Production Concepts + Accessibility (art-director + accessibility-specialist, parallel)
 
@@ -128,7 +128,7 @@ Spawn the `accessibility-specialist` agent in parallel to:
 
 Wait for both agents to return before proceeding.
 
-**Gate**: Use `AskUserQuestion` to present both Step 4 results. If the accessibility-specialist returned any BLOCKING concerns, highlight them prominently and offer:
+**Gate**: Use `question` to present both Step 4 results. If the accessibility-specialist returned any BLOCKING concerns, highlight them prominently and offer:
 - (a) Return to level-designer and art-director to redesign the flagged elements before Step 5
 - (b) Document as a known accessibility gap and proceed to Step 5 with the concern explicitly logged in the final report
 
@@ -156,11 +156,8 @@ After all subagent outputs are collected, spawn `level-designer` via Task to com
    cross-level dependencies (adjacent areas referenced but not yet designed, each
    marked UNRESOLVED), and accessibility concerns with their resolution status.
 
-## File Write Protocol
-
-All file writes (level design docs, narrative docs, test checklists) are delegated
-to sub-agents spawned via Task. Each sub-agent enforces the "May I write to [path]?"
-protocol. This orchestrator does not write files directly.
+@.opencode/docs/shared-protocols.md#file-write-protocol
+@.opencode/docs/shared-protocols.md#error-recovery-protocol
 
 Verdict: **COMPLETE** — level design document produced and all team outputs compiled.
 Verdict: **BLOCKED** — one or more agents blocked; partial report produced with unresolved items listed.
@@ -170,18 +167,6 @@ Verdict: **BLOCKED** — one or more agents blocked; partial report produced wit
 - Run `/design-review design/levels/[level-name].md` to validate the completed level design doc.
 - Run `/dev-story` to implement level content once the design is approved.
 - Run `/qa-plan` to generate a QA test plan for this level.
-
-## Error Recovery Protocol
-
-If any spawned agent (via Task) returns BLOCKED, errors, or cannot complete:
-
-1. **Surface immediately**: Report "[AgentName]: BLOCKED — [reason]" to the user before continuing to dependent phases
-2. **Assess dependencies**: Check whether the blocked agent's output is required by subsequent phases. If yes, do not proceed past that dependency point without user input.
-3. **Offer options** via AskUserQuestion with choices:
-   - Skip this agent and note the gap in the final report
-   - Retry with narrower scope
-   - Stop here and resolve the blocker first
-4. **Always produce a partial report** — output whatever was completed. Never discard work because one agent blocked.
 
 Common blockers:
 - Input file missing (story not found, GDD absent) → redirect to the skill that creates it

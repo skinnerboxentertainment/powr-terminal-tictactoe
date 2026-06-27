@@ -52,7 +52,7 @@
 ## Allowed Libraries / Addons
 
 - pixi.js (v8.x)
-- [None yet — add as dependencies are approved]
+- howler.js (v2.x) — audio playback, sprite maps, spatial audio
 
 ## Architecture Decisions Log
 

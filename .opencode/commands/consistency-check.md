@@ -280,7 +280,7 @@ Silently append to `production/session-state/active.md` (create the file if it d
 <!-- CONSISTENCY-CHECK: [date] | GDDs checked: [N] | Conflicts found: [N] | Report: docs/consistency-report-[date].md -->
 ```
 
-Then close with an `AskUserQuestion` widget:
+Then close with an `question` widget:
 
 - **Prompt**: "Consistency check complete — [N] conflicts found. What next?"
 - **Options**:

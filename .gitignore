@@ -51,6 +51,9 @@ out/
 __pycache__/
 *.pyc
 
+# === Skills CLI lockfile ===
+skills-lock.json
+
 # === Archives ===
 *.zip
 *.tar.gz

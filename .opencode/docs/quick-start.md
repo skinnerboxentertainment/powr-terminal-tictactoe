@@ -2,14 +2,13 @@
 
 ## What Is This?
 
-This is a complete OpenCode agent architecture for game development. It
-organizes 49 specialized AI agents into a studio hierarchy that mirrors
+This is a complete OpenCode agent architecture for browser game development. It
+organizes 36 specialized AI agents into a studio hierarchy that mirrors
 real game development teams, with defined responsibilities, delegation
-rules, and coordination protocols. It includes engine-specialist agents
-for Godot, Unity, and Unreal — each with dedicated sub-specialists for
-major engine subsystems. All design agents and templates are grounded in
+rules, and coordination protocols. It is built on PixiJS v8 + TypeScript
+for web browser delivery. All design agents and templates are grounded in
 established game design theory (MDA Framework, Self-Determination Theory,
-Flow State, Bartle Player Types). Use whichever engine set matches your project.
+Flow State, Bartle Player Types).
 
 ## How to Use
 
@@ -53,21 +52,10 @@ Ask yourself: "What department would handle this in a real studio?"
 | Test a mechanic idea quickly | `prototyper` |
 | Review code for security issues | `security-engineer` |
 | Check accessibility compliance | `accessibility-specialist` |
-| Get Unreal Engine advice | `unreal-specialist` |
-| Get Unity advice | `unity-specialist` |
-| Get Godot advice | `godot-specialist` |
-| Design GAS abilities/effects | `ue-gas-specialist` |
-| Define BP/C++ boundaries | `ue-blueprint-specialist` |
-| Implement UE replication | `ue-replication-specialist` |
-| Build UMG/CommonUI widgets | `ue-umg-specialist` |
-| Design DOTS/ECS architecture | `unity-dots-specialist` |
-| Write Unity shaders/VFX | `unity-shader-specialist` |
-| Manage Addressable assets | `unity-addressables-specialist` |
-| Build UI Toolkit/UGUI screens | `unity-ui-specialist` |
-| Write idiomatic GDScript | `godot-gdscript-specialist` |
-| Write Godot C# code | `godot-csharp-specialist` |
-| Create Godot shaders | `godot-shader-specialist` |
-| Build GDExtension modules | `godot-gdextension-specialist` |
+| Get PixiJS rendering advice | `pixijs-specialist` |
+| Write a custom shader | `pixijs-specialist` |
+| Optimize rendering performance | `pixijs-specialist` |
+| Build UI with PixiJS containers | `ui-programmer` |
 | Plan live events and seasons | `live-ops-designer` |
 | Write patch notes for players | `community-manager` |
 | Brainstorm a new game idea | Use `/brainstorm` skill |
@@ -215,12 +203,12 @@ If you already know what you need, jump directly to the relevant path:
 1. **Run `/start`** (or `/brainstorm open`) — guided creative exploration:
    what excites you, what you've played, your constraints
    - Generates 3 concepts, helps you pick one, defines core loop and pillars
-   - Produces a game concept document and recommends an engine
-2. **Set up the engine** — Run `/setup-engine` (uses the brainstorm recommendation)
+   - Produces a game concept document
+2. **Set up the engine** — Run `/setup-engine`
    - Configures GUIDE.md, detects knowledge gaps, populates reference docs
    - Creates `.opencode/docs/technical-preferences.md` with naming conventions,
-     performance budgets, and engine-specific defaults
-   - If the engine version is newer than the LLM's training data, it fetches
+     performance budgets, and project defaults
+   - If the PixiJS version is newer than the LLM's training data, it fetches
      current docs from the web so agents suggest correct APIs
 3. **Validate the concept** — Run `/design-review design/gdd/game-concept.md`
 4. **Decompose into systems** — Run `/map-systems` to map all systems and dependencies
@@ -235,8 +223,8 @@ If you already know what you need, jump directly to the relevant path:
 
 If you already have a game concept and engine choice:
 
-1. **Set up the engine** — Run `/setup-engine [engine] [version]`
-   (e.g., `/setup-engine godot 4.6`) — also creates technical preferences
+1. **Set up the engine** — Run `/setup-engine` — configures PixiJS v8 reference docs
+   and creates technical preferences
 2. **Write the Game Pillars** — delegate to `creative-director`
 3. **Decompose into systems** — Run `/map-systems` to enumerate systems and dependencies
 4. **Design each system** — Run `/design-system [system-name]` for GDDs in dependency order
@@ -245,13 +233,12 @@ If you already have a game concept and engine choice:
 7. **Plan the first sprint** — Run `/sprint-plan new`
 8. Start building
 
-### Path C: "I know the game but not the engine"
+### Path C: "I know the game but need to configure the engine"
 
-If you have a concept but don't know which engine fits:
+If you have a concept and need to set up PixiJS:
 
-1. **Run `/setup-engine`** with no arguments — it will ask about your game's
-   needs (2D/3D, platforms, team size, language preferences) and recommend
-   an engine based on your answers
+1. **Run `/setup-engine`** — it will configure PixiJS v8 and populate
+   reference docs for your project
 2. Follow Path B from step 2 onward
 
 ### Path D: "I have an existing project"
@@ -273,10 +260,9 @@ If you have design docs, prototypes, or code already:
 GUIDE.md                          -- Master config (read this first, ~60 lines)
 .opencode/
   settings.json                    -- OpenCode hooks and project settings
-  agents/                          -- 35 agent definitions (YAML frontmatter)
-  skills/                          -- 73 slash command definitions (YAML frontmatter)
-  hooks/                           -- 12 hook scripts (.sh) wired by settings.json
-  rules/                           -- 11 path-specific rule files
+  agents/                          -- 36 agent definitions (YAML frontmatter)
+  commands/                        -- 77 slash command definitions (YAML frontmatter)
+  rules/                           -- 12 path-specific rule files
   docs/
     quick-start.md                 -- This file
     technical-preferences.md       -- Project-specific standards (populated by /setup-engine)

@@ -25,9 +25,9 @@ ADR Dependencies, Engine Compatibility, GDD Requirements Addressed
 
 **Validation:** Run `/architecture-review` after completing a set of ADRs.
 
-## Engine Reference (`docs/engine-reference/`)
+## Engine Reference (`.opencode/docs/pixijs-reference/`)
 
 Version-pinned engine API snapshots. **Always check here before using any
 engine API** — the LLM's training data predates the pinned engine version.
 
-Current engine: see `docs/engine-reference/godot/VERSION.md`
+Current engine: see `.opencode/docs/pixijs-reference/VERSION.md`

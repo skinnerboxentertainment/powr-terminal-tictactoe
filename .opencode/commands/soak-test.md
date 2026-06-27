@@ -83,26 +83,11 @@ Phase 4.
 
 ### Memory / Stability observation items (if focus = memory or all)
 
-Engine-specific monitoring guidance:
+Memory monitoring guidance (use browser DevTools Performance/Memory tabs):
 
-**Godot 4:**
-- Open Debugger → Monitors tab; track `Memory → Static Memory` and
-  `Object Count → Objects` across checkpoints
-- Record: Static Memory (KB), Object Count, Orphan Nodes count
-- Alert threshold: Memory growth > 20% from T+0 after the first 15 minutes
+- Record: JS Heap Size (MB), DOM Nodes, Event Listeners at each checkpoint
+- Alert threshold: Heap growth > 20% from T+0 after the first 15 minutes
   (some growth on load is expected; sustained growth indicates a leak)
-- Note: `Performance.get_monitor(Performance.MEMORY_STATIC)` returns bytes
-  in Godot 4.6
-
-**Unity:**
-- Open Memory Profiler (Window → Analysis → Memory Profiler)
-- Record: Total Reserved Memory (MB), GC Allocated (MB), Object Count at each checkpoint
-- Alert threshold: GC Allocated growing monotonically across 3+ checkpoints
-
-**Unreal Engine:**
-- Use `stat memory` console command at each checkpoint
-- Record: Physical Memory Used (MB), Physical Memory Available
-- Alert threshold: Physical Memory Used growth > 50MB over the full soak
 
 ### Stability observation items (if focus = stability or all)
 

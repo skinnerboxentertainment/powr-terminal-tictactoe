@@ -32,7 +32,7 @@ read that file directly.
 1. Check `production/session-state/active.md` for the currently active story.
 2. If not found there, read the most recent file in `production/sprints/` and
    look for stories marked IN PROGRESS.
-3. If multiple in-progress stories are found, use `AskUserQuestion`:
+3. If multiple in-progress stories are found, use `question`:
    - "Which story are we completing?"
    - Options: list the in-progress story file names.
 4. If no story can be found, ask the user to provide the path.
@@ -82,13 +82,13 @@ three methods:
   that should be in localization files.
 - **Dependency check**: if a criterion says "depends on X", check that X exists.
 
-### Manual verification with confirmation (use `AskUserQuestion`)
+### Manual verification with confirmation (use `question`)
 
 - Criteria about subjective qualities ("feels responsive", "animations play correctly")
 - Criteria about gameplay behaviour ("player takes damage when...", "enemy responds to...")
 - Performance criteria ("completes within Xms") — ask if profiled or accept as assumed
 
-Batch up to 4 manual verification questions into a single `AskUserQuestion` call:
+Batch up to 4 manual verification questions into a single `question` call:
 
 ```
 question: "Does [criterion]?"
@@ -112,7 +112,7 @@ For each acceptance criterion in the story:
    - **Unit test**: check `tests/unit/` for a test file or function name that
      matches the criterion's subject (use `Glob` and `Grep`)
    - **Integration test**: check `tests/integration/` similarly
-   - **Manual confirmation**: if the criterion was verified via `AskUserQuestion`
+   - **Manual confirmation**: if the criterion was verified via `question`
      above with a "Yes — passes" answer, count that as a manual test
 
 2. Produce a traceability table:
@@ -230,7 +230,7 @@ For each deviation found, categorize:
 - `lean` → skip (not a PHASE-GATE). Note: "QL-TEST-COVERAGE skipped — Lean mode." Proceed to Phase 5.
 - `full` → spawn as normal.
 
-After completing the deviation checks in Phase 4, spawn `qa-lead` via Task using gate **QL-TEST-COVERAGE** (`.opencode/docs/director-gates.md`).
+After completing the deviation checks in Phase 4, spawn `qa-lead` via task using gate **QL-TEST-COVERAGE** (`.opencode/docs/director-gates.md`).
 
 Pass:
 - The story file path and story type
@@ -253,7 +253,7 @@ Skip this phase for Config/Data stories (no code tests required).
 
 **Review mode check** — apply before spawning LP-CODE-REVIEW:
 - `solo` → skip. Note: "LP-CODE-REVIEW skipped — Solo mode." Proceed to Phase 6 (completion report).
-- `lean` → use `AskUserQuestion` before proceeding:
+- `lean` → use `question` before proceeding:
   - Prompt: "Code review is skipped in lean mode. Did you run `/code-review` on the implemented files?"
   - Options:
     - `Yes — /code-review passed or was approved with suggestions`
@@ -262,11 +262,11 @@ Skip this phase for Config/Data stories (no code tests required).
   - Record the answer in the completion notes (Phase 7). All three options proceed to Phase 6.
 - `full` → spawn as normal.
 
-Spawn `lead-programmer` via Task using gate **LP-CODE-REVIEW** (`.opencode/docs/director-gates.md`).
+Spawn `lead-programmer` via task using gate **LP-CODE-REVIEW** (`.opencode/docs/director-gates.md`).
 
 Pass: implementation file paths, story file path, relevant GDD section, governing ADR.
 
-Present the verdict to the user. If CONCERNS, surface them via `AskUserQuestion`:
+Present the verdict to the user. If CONCERNS, surface them via `question`:
 - Options: `Revise flagged issues` / `Accept and proceed` / `Discuss further`
 If REJECT, do not proceed to Phase 6 verdict until the issues are resolved.
 
@@ -325,7 +325,7 @@ fixed. Offer to help fix the blocking items.
 
 ## Phase 7: Update Story Status
 
-Use `AskUserQuestion` before writing anything:
+Use `question` before writing anything:
 - Prompt: "Verification complete. How do you want to proceed?"
 - Options:
   - `Close the story — update file, mark Complete, log notes (Recommended)`
@@ -443,7 +443,7 @@ If no more stories are ready but Must Have stories are still In Progress (not Co
   decides if they are acceptable.
 - **BLOCKED verdict is advisory** — the user can override and mark complete
   anyway; document the risk explicitly if they do.
-- Use `AskUserQuestion` for the code review prompt and for batching manual
+- Use `question` for the code review prompt and for batching manual
   criteria confirmations.
 
 ---

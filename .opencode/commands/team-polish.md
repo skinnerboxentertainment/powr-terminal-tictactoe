@@ -4,11 +4,11 @@ agent: build
 ---
 
 If no argument is provided, output usage guidance and exit without spawning any agents:
-> Usage: `/team-polish [feature or area]` — specify the feature or area to polish (e.g., `combat`, `main menu`, `inventory system`, `level-1`). Do not use `AskUserQuestion` here; output the guidance directly.
+> Usage: `/team-polish [feature or area]` — specify the feature or area to polish (e.g., `combat`, `main menu`, `inventory system`, `level-1`). Do not use `question` here; output the guidance directly.
 
 When this skill is invoked with an argument, orchestrate the polish team through a structured pipeline.
 
-**Decision Points:** At each phase transition, use `AskUserQuestion` to present
+**Decision Points:** At each phase transition, use `question` to present
 the user with the subagent's proposals as selectable options. Write the agent's
 full analysis in conversation, then capture the decision with concise labels.
 The user must approve before moving to the next phase.
@@ -38,13 +38,13 @@ Store the resolved mode for use in all subsequent phases.
 
 ## How to Delegate
 
-Use the Task tool to spawn each team member as a subagent:
-- `subagent_type: performance-analyst` — Profiling, optimization, memory analysis
-- `subagent_type: engine-programmer` — Engine-level fixes for rendering, memory, resource loading
-- `subagent_type: technical-artist` — VFX polish, shader optimization, visual quality
-- `subagent_type: sound-designer` — Audio polish, mixing, ambient layers
-- `subagent_type: tools-programmer` — Content pipeline and editor tool verification
-- `subagent_type: qa-tester` — Edge case testing, regression testing, soak testing
+Use the task tool to spawn each team member as a subagent:
+- Spawn `performance-analyst` — Profiling, optimization, memory analysis
+- Spawn `engine-programmer` — Engine-level fixes for rendering, memory, resource loading
+- Spawn `technical-artist` — VFX polish, shader optimization, visual quality
+- Spawn `sound-designer` — Audio polish, mixing, ambient layers
+- Spawn `tools-programmer` — Content pipeline and editor tool verification
+- Spawn `qa-tester` — Edge case testing, regression testing, soak testing
 
 Always provide full context in each agent's prompt (target feature/area, performance budgets, known issues). Launch independent agents in parallel where the pipeline allows it (e.g., Phases 3 and 4 can run simultaneously).
 
@@ -102,29 +102,8 @@ Delegate to **qa-tester**:
 - Report: READY FOR RELEASE / NEEDS MORE WORK
 - List any remaining issues with severity and recommendations
 
-## Error Recovery Protocol
-
-If any spawned agent (via Task) returns BLOCKED, errors, or cannot complete:
-
-1. **Surface immediately**: Report "[AgentName]: BLOCKED — [reason]" to the user before continuing to dependent phases
-2. **Assess dependencies**: Check whether the blocked agent's output is required by subsequent phases. If yes, do not proceed past that dependency point without user input.
-3. **Offer options** via AskUserQuestion with choices:
-   - Skip this agent and note the gap in the final report
-   - Retry with narrower scope
-   - Stop here and resolve the blocker first
-4. **Always produce a partial report** — output whatever was completed. Never discard work because one agent blocked.
-
-Common blockers:
-- Input file missing (story not found, GDD absent) → redirect to the skill that creates it
-- ADR status is Proposed → do not implement; run `/architecture-decision` first
-- Scope too large → split into two stories via `/create-stories`
-- Conflicting instructions between ADR and story → surface the conflict, do not guess
-
-## File Write Protocol
-
-All file writes (performance reports, test results, evidence docs) are delegated to
-sub-agents spawned via Task. Each sub-agent enforces the "May I write to [path]?"
-protocol. This orchestrator does not write files directly.
+@.opencode/docs/shared-protocols.md#error-recovery-protocol
+@.opencode/docs/shared-protocols.md#file-write-protocol
 
 ## Output
 

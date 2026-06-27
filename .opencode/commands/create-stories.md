@@ -105,14 +105,14 @@ For each story, determine:
 - `lean` → skip (not a PHASE-GATE). Note: "QL-STORY-READY skipped — Lean mode." Proceed to Step 5 (present stories for review).
 - `full` → spawn as normal.
 
-After decomposing all stories (Step 4 complete) but before presenting them for write approval, spawn `qa-lead` via Task using gate **QL-STORY-READY** (`.opencode/docs/director-gates.md`).
+After decomposing all stories (Step 4 complete) but before presenting them for write approval, spawn `qa-lead` via task using gate **QL-STORY-READY** (`.opencode/docs/director-gates.md`).
 
 Pass: the full story list with acceptance criteria, story types, and TR-IDs; the epic's GDD acceptance criteria for reference.
 
 Present the QA lead's assessment. For each story flagged as GAPS or INADEQUATE, revise the acceptance criteria before proceeding — stories with untestable criteria cannot be implemented correctly. Once all stories reach ADEQUATE, proceed.
 
 **Before generating test specs**: Glob `production/qa/qa-plan-*.md` for the most recently modified file. If found, read it and check whether it contains test case specifications for the stories in this epic (look for story titles or slugs in the plan's Automated Tests Required section). If matching specs exist:
-- Use `AskUserQuestion`:
+- Use `question`:
   - Prompt: "A QA plan exists at [path] with test specs for some of these stories. How do you want to proceed?"
   - Options:
     - `Use existing specs from the QA plan — embed them into the story files (Recommended)`
@@ -166,7 +166,7 @@ Story 003: [title] — Visual/Feel — ADR-NNNN
 [N stories total: N Logic, N Integration, N Visual/Feel, N UI, N Config/Data]
 ```
 
-Use `AskUserQuestion`:
+Use `question`:
 - Prompt: "May I write these [N] stories to `production/epics/[epic-slug]/`?"
 - Options: `[A] Yes — write all [N] stories` / `[B] Not yet — I want to review or adjust first`
 
@@ -295,7 +295,7 @@ Find the row in the index table matching this epic (by epic name or slug). Updat
 
 ## 7. After Writing
 
-Use `AskUserQuestion` to close with context-aware next steps:
+Use `question` to close with context-aware next steps:
 
 Check:
 - Are there other epics in `production/epics/` without stories yet? List them.

@@ -113,7 +113,7 @@ Post-Cutoff Versions: [list]
 - [GDD system name] → [domain] → [risk level]
 ```
 
-Use `AskUserQuestion`:
+Use `question`:
 - Prompt: "One or more engine domains are HIGH RISK — the LLM's knowledge may be unreliable for these areas. Architectural recommendations in these domains should be cross-referenced with the engine docs before being acted on. How would you like to proceed?"
 - Options:
   - `[A] Proceed — flag HIGH RISK domains throughout the output`
@@ -172,8 +172,8 @@ Format as a table per layer, then as an ASCII dependency diagram.
 relevant module reference doc. If an API is post-cutoff, flag it:
 
 ```
-⚠️  [ClassName.method()] — Godot 4.6 (post-cutoff, HIGH risk)
-    Verified against: docs/engine-reference/godot/modules/[domain].md
+⚠️  [ClassName.method()] — PixiJS v8 (post-cutoff, HIGH risk)
+    Verified against: .opencode/docs/pixijs-reference/VERSION.md
     Behaviour confirmed: [yes / NEEDS VERIFICATION]
 ```
 
@@ -212,9 +212,9 @@ Define the public contracts between modules. For each boundary:
 Write in pseudocode or the project's actual language (from technical preferences).
 These become the contracts programmers implement against.
 
-**Engine awareness check**: If any interface uses engine-specific types (e.g.
-`Node`, `Resource`, `Signal` in Godot), flag the version and verify the type
-exists and has not changed signature in the target engine version.
+**Engine awareness check**: If any interface uses PixiJS-specific types (e.g.
+`Container`, `Sprite`, `Application`), flag the version and verify the type
+exists and has not changed signature in PixiJS v8.
 
 ---
 
@@ -286,7 +286,7 @@ but don't yet. Group by priority:
 Once all sections are approved, write the complete document to
 `docs/architecture/architecture.md`.
 
-Display a one-paragraph summary of what the document will contain (layers, modules, data flows, ADR gaps). Then use `AskUserQuestion`:
+Display a one-paragraph summary of what the document will contain (layers, modules, data flows, ADR gaps). Then use `question`:
 - "All sections approved. May I write the master architecture document?"
   - [A] Yes — write to `docs/architecture/architecture.md` now
   - [B] Show me the full draft inline first, then ask again
@@ -348,7 +348,7 @@ Apply gate **TD-ARCHITECTURE** (`.opencode/docs/director-gates.md`) as a self-re
 - `lean` → skip (not a PHASE-GATE). Note: "LP-FEASIBILITY skipped — Lean mode." Proceed to Phase 8 handoff.
 - `full` → spawn as normal.
 
-**Step 2 — Spawn `lead-programmer` via Task using gate LP-FEASIBILITY (`.opencode/docs/director-gates.md`):**
+**Step 2 — Spawn `lead-programmer` via task using gate LP-FEASIBILITY (`.opencode/docs/director-gates.md`):**
 
 Pass: architecture document path, technical requirements baseline summary, ADR list.
 
@@ -356,7 +356,7 @@ Pass: architecture document path, technical requirements baseline summary, ADR l
 
 Show the Technical Director assessment and Lead Programmer verdict side by side.
 
-Use `AskUserQuestion` — "Technical Director and Lead Programmer have reviewed the architecture. How would you like to proceed?"
+Use `question` — "Technical Director and Lead Programmer have reviewed the architecture. How would you like to proceed?"
 Options: `Accept — proceed to handoff` / `Revise flagged items first` / `Discuss specific concerns`
 
 **Step 4 — Record sign-off in the architecture document:**
@@ -367,7 +367,7 @@ Update the Document Status section:
 - Lead Programmer Feasibility: FEASIBLE / CONCERNS ACCEPTED / REVISED
 ```
 
-Show the proposed Document Status block inline, then use `AskUserQuestion`:
+Show the proposed Document Status block inline, then use `question`:
 - "May I update the Document Status section with the sign-off results?"
   - [A] Yes — apply to `docs/architecture/architecture.md`
   - [B] Not yet — I want to revisit the concerns first
@@ -441,7 +441,7 @@ This skill follows the collaborative design principle at every phase:
 3. **Ask before deciding** — present options for each architectural choice
 4. **Draft before approval** — show the content inline before asking to write it.
    Never ask approval for a section the user has not yet seen.
-5. **Use `AskUserQuestion` for write approvals** — plain text "May I?" is not
+5. **Use `question` for write approvals** — plain text "May I?" is not
    sufficient. Use the structured tool with labeled options [A]/[B]/[C] (write now /
    show full draft first / not yet). For multi-file changesets, list every file
    and what changes, then ask once grouped — not separate plain-text asks per file.
