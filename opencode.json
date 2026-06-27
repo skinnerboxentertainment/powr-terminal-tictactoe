@@ -27,9 +27,6 @@
       "ls *": "allow",
       "dir *": "allow",
       "python -m json.tool*": "allow",
-      "python -m pytest*": "allow",
-      "py -m pytest*": "allow",
-      "python -m pytest*": "allow",
       "grep *": "allow",
       "rg *": "allow"
     },
@@ -53,8 +50,7 @@
           "dir *": "allow",
           "python *": "allow",
           "node *": "allow",
-          "npm *": "allow",
-          "dotnet *": "allow"
+          "npm *": "allow"
         }
       }
     },
