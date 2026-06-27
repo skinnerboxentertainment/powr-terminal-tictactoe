@@ -14,7 +14,7 @@
   <a href=".opencode/agents"><img src="https://img.shields.io/badge/agents-36-blueviolet" alt="36 Agents"></a>
   <a href=".opencode/commands"><img src="https://img.shields.io/badge/commands-77-green" alt="77 Commands"></a>
   <a href=".opencode/rules"><img src="https://img.shields.io/badge/rules-12-red" alt="12 Rules"></a>
-  <a href="https://opencode.ai"><img src="https://img.shields.io/badge/built%20for-OpenCode-f5f5f5" alt="Built for OpenCode"></a>
+  <a href="https://opencode.ai"><img src="https://img.shields.io/badge/powered%20by-OpenCode-6a0dad" alt="Powered by OpenCode"></a>
 </p>
 
 ---
@@ -222,8 +222,9 @@ MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
-*Built for [OpenCode](https://opencode.ai).*
+*Built with [OpenCode](https://opencode.ai) — the AI coding platform that
+orchestrates the studio agents, generates builds, and powers `/auto-build`.*
 
-Forked from [OpenCode PixiJS Game Studio](https://github.com/skinnerboxentertainment/AutoMagically)
+Forked from [AutoMagically](https://github.com/skinnerboxentertainment/AutoMagically)
 by skinnerboxentertainment, which was itself derived from
 [Claude Code Game Studios](https://github.com/Donchitos/Claude-Code-Game-Studios) by Donchitos.

@@ -1,12 +1,14 @@
 # AutoMagically Built Games — Game Studio Agent Architecture
 
-Indie game development managed through 36 coordinated OpenCode agents.
+Indie game development managed through 36 coordinated [OpenCode](https://opencode.ai) agents.
 Each agent owns a specific domain, enforcing separation of concerns and quality.
+OpenCode orchestrates the studio — it runs the agents, executes the commands,
+and powers `/auto-build` from spec to running build.
 
 Forked from [AutoMagically](https://github.com/skinnerboxentertainment/AutoMagically)
 (skinnerboxentertainment), originally derived from
 [Claude Code Game Studios](https://github.com/Donchitos/Claude-Code-Game-Studios) by Donchitos.
-Refactored with /auto-build, document analysis, custom architecture skills,
+Refactored with `/auto-build`, document analysis, custom architecture skills,
 engine drift cleanup, and tool-agnostic commands. Targeting the browser as the primary platform.
 
 ## Model Tier Configuration
