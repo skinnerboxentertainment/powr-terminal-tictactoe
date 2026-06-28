@@ -40,7 +40,6 @@ export class InputManager {
       if (!this.prevKeys.has(k)) this.keysJustPressed.add(k)
     }
     this.prevKeys = new Set(this.keys)
-    this.mouse.leftClicked = false
   }
 
   destroy(): void {

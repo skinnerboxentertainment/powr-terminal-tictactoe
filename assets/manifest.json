@@ -1,0 +1,12 @@
+{
+  "bundles": [
+    {
+      "name": "core",
+      "assets": {}
+    },
+    {
+      "name": "game",
+      "assets": {}
+    }
+  ]
+}
