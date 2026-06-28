@@ -126,4 +126,15 @@ export class TerminalGrid {
 
     this.dirty = false
   }
+
+  setCellAlpha(row: number, col: number, alpha: number): void {
+    if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) return
+    this.textPool[row][col].alpha = alpha
+  }
+
+  setAllAlpha(alpha: number): void {
+    for (let r = 0; r < this.rows; r++)
+      for (let c = 0; c < this.cols; c++)
+        this.textPool[r][c].alpha = alpha
+  }
 }

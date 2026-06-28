@@ -11,6 +11,7 @@ export class TitleScene implements Scene {
   private container = new Container()
   private screenContent = new Container()
   private noiseFilter = new NoiseFilter({ noise: 0.06, seed: 0 })
+  private logoNoise = new NoiseFilter({ noise: 0.2, seed: 0 })
   private logoContainer = new Container()
   private glowFilter = new BlurFilter({ strength: 16 })
 
@@ -23,14 +24,21 @@ export class TitleScene implements Scene {
   private promptText = new Text({ text: "", style: { fontFamily: "monospace", fontSize: 16, fill: 0x00b7c7 } })
   private cursorText = new Text({ text: "_", style: { fontFamily: "monospace", fontSize: 16, fill: 0x00b7c7 } })
   private subtitleText = new Text({ text: "", style: { fontFamily: "monospace", fontSize: 12, fill: 0x087f8c } })
+  private bannerGrid = new TerminalGrid(50, 22)
+  private fgGrid = new TerminalGrid(50, 22)
+  private fgPhase = 0
+  private fgTick = 0
+  private fgRampCells = new Map<string, { cur: number; tgt: number }>()
 
-  private glowLayer = new Text({ text: "TIC TAC TOE" })
-  private shadowLayer = new Text({ text: "TIC TAC TOE" })
-  private extDeep = new Text({ text: "TIC TAC TOE" })
-  private extMid = new Text({ text: "TIC TAC TOE" })
-  private faceLayer = new Text({ text: "TIC TAC TOE" })
-  private coreLayer = new Text({ text: "TIC TAC TOE" })
-  private rimLayer = new Text({ text: "TIC TAC TOE" })
+  private glowChars: Text[] = []
+  private shadowChars: Text[] = []
+  private extDeepChars: Text[] = []
+  private extMidChars: Text[] = []
+  private coreChars: Text[] = []
+  private rimChars: Text[] = []
+  private faceChars: Text[] = []
+  private charStates: { timer: number; corrupt: boolean; age: number }[] = []
+  private bannerSeeds: number[][] = []
 
   private app: Application
   private stage: Container
@@ -45,11 +53,29 @@ export class TitleScene implements Scene {
   private cursorTimer = 0
   private animFrame = 0
   private animating = true
+  private bannerPhase = 0
+  private bannerTick = 0
   private glitchTimer = 0
   private glitching = false
   private headerStr = ""
   private footerStr = ""
+  private bannerCellSize = 0
+  private rampCells = new Map<string, { cur: number; tgt: number }>()
+  private static RAMP_UP = 0.04
+  private static RAMP_DOWN = 0.002
+  private static BANNER_BASE_ALPHA = 0.08
+  private static BANNER_HOVER_ALPHA = 0.8
   private static GLITCH_CHARS = "╪╬╫╨╥┴┬├┤┼╡╢╖╕╣║═╔╗╚╝░▒▓█"
+  private static LOGO_TEXT = "TIC TAC TOE"
+  private static GLITCH_VARIANTS: Record<string, string[]> = {
+    T: ["Ŧ", "Ť", "Ţ", "Ṫ", "Ŧ"],
+    I: ["Ɨ", "Ǐ", "Ĩ", "Ï", "Ḯ"],
+    C: ["Ç", "Ĉ", "Č", "Ċ", "ç"],
+    A: ["À", "Á", "Â", "Ã", "Ä", "Å", "Ă", "Ǎ"],
+    O: ["Ò", "Ó", "Ô", "Õ", "Ö", "Ø", "Ő"],
+    E: ["È", "É", "Ê", "Ë", "Ě", "Ē"],
+  }
+  private static BANNER_CYCLE = "█▓▒░▒▓"
 
   constructor(app: Application, stage: Container, sceneManager: SceneManager, input: InputManagerType) {
     this.app = app
@@ -61,6 +87,7 @@ export class TitleScene implements Scene {
   enter(): void {
     const cfg = getConfig()
     this.screenContent.filters = [this.noiseFilter]
+    this.logoContainer.filters = [this.logoNoise]
 
     this.container.addChild(this.housingG)
     this.container.addChild(this.screenG)
@@ -68,6 +95,7 @@ export class TitleScene implements Scene {
     this.screenContent.addChild(this.scanlineG)
     this.screenContent.addChild(this.ansiGrid.container)
     this.screenContent.addChild(this.logoContainer)
+    this.screenContent.addChild(this.fgGrid.container)
     this.screenContent.addChild(this.promptText)
     this.screenContent.addChild(this.cursorText)
     this.screenContent.addChild(this.subtitleText)
@@ -76,8 +104,19 @@ export class TitleScene implements Scene {
 
     this.animFrame = 0
     this.animating = true
+    this.bannerPhase = 0
+    this.bannerTick = 0
+    this.fgPhase = 0
+    this.fgTick = 0
+    this.bannerSeeds = []
+    for (let r = 0; r < 22; r++) {
+      this.bannerSeeds[r] = []
+      for (let c = 0; c < 50; c++) this.bannerSeeds[r][c] = Math.floor(Math.random() * 6)
+    }
     this.glitchTimer = 0
     this.glitching = false
+    this.charStates = []
+    for (let i = 0; i < 11; i++) this.charStates.push({ timer: Math.random() * 200, corrupt: false, age: 0 })
 
     this.layout(cfg)
     audioManager.playMusic("bg")
@@ -98,6 +137,8 @@ export class TitleScene implements Scene {
     this.drawHousing(cfg, cx, cy, cs)
     this.drawScreenFill(cfg)
     this.drawTerminalFrame(cfg, cs)
+    this.drawBanner(cfg)
+    this.drawFgBanner(cfg)
     this.drawLogo(cfg, cs)
     this.drawPrompt(cfg, cs)
     this.drawScanlines(cfg)
@@ -122,6 +163,59 @@ export class TitleScene implements Scene {
     g.rect(sx, sy, this.screenRight - sx, this.screenBottom - sy)
     g.fill({ color: cfg.screen_color })
     this.screenContent.filterArea = new Rectangle(sx, sy, this.screenRight - sx, this.screenBottom - sy)
+  }
+
+  private drawBanner(cfg: GameplayConfig): void {
+    if (this.bannerGrid.container.parent) this.bannerGrid.container.parent.removeChild(this.bannerGrid.container)
+
+    const sw = this.screenRight - this.screenLeft
+    const sh = this.screenBottom - this.screenTop
+    const cellSize = Math.min(sw / 50, sh / 22)
+    const cycle = TitleScene.BANNER_CYCLE
+
+    this.bannerGrid.setCellSize(cellSize, cellSize)
+    this.bannerGrid.setPosition(this.screenLeft, this.screenTop)
+    this.bannerCellSize = cellSize
+    this.updateBannerCells(this.bannerPhase, cfg.grid_color)
+    this.bannerGrid.render()
+    this.bannerGrid.setAllAlpha(TitleScene.BANNER_BASE_ALPHA)
+    this.bannerGrid.container.alpha = 1
+    this.screenContent.addChildAt(this.bannerGrid.container, 0)
+  }
+
+  private drawFgBanner(cfg: GameplayConfig): void {
+    if (this.fgGrid.container.parent) this.fgGrid.container.parent.removeChild(this.fgGrid.container)
+
+    const sw = this.screenRight - this.screenLeft
+    const sh = this.screenBottom - this.screenTop
+    const cellSize = Math.min(sw / 50, sh / 22)
+
+    this.fgGrid.setCellSize(cellSize, cellSize)
+    this.fgGrid.setPosition(this.screenLeft, this.screenTop)
+    this.updateFgCells(this.fgPhase, cfg.grid_color)
+    this.fgGrid.render()
+    this.fgGrid.setAllAlpha(TitleScene.BANNER_BASE_ALPHA * 0.5)
+    this.fgGrid.container.alpha = 1
+  }
+
+  private updateBannerCells(phase: number, color: number): void {
+    const cycle = TitleScene.BANNER_CYCLE
+    const len = cycle.length
+    for (let r = 0; r < 22; r++) {
+      for (let c = 0; c < 50; c++) {
+        this.bannerGrid.setChar(r, c, cycle[(this.bannerSeeds[r][c] + phase) % len], color)
+      }
+    }
+  }
+
+  private updateFgCells(phase: number, color: number): void {
+    const cycle = TitleScene.BANNER_CYCLE
+    const len = cycle.length
+    for (let r = 0; r < 22; r++) {
+      for (let c = 0; c < 50; c++) {
+        this.fgGrid.setChar(r, c, cycle[(this.bannerSeeds[r][c] + phase + 3) % len], color)
+      }
+    }
   }
 
   private drawTerminalFrame(cfg: GameplayConfig, cs: number): void {
@@ -151,58 +245,46 @@ export class TitleScene implements Scene {
     const fs = cs * 0.104
     const cx = (this.screenLeft + this.screenRight) / 2
     const cy = (this.screenTop + this.screenBottom) / 2 - 140
+    const charW = fs * 0.6 + 8
+    const totalW = 11 * charW
+    const startX = cx - totalW / 2 + charW / 2
+    const layers = [
+      { name: "glow", fill: cfg.glow_color, dx: 0, dy: 0, stroke: null as null, filter: this.glowFilter, alpha: 0 },
+      { name: "shadow", fill: 0x000000, dx: 5, dy: 5, stroke: null, filter: null, alpha: 0 },
+      { name: "extDeep", fill: 0x022a33, dx: 3, dy: 3, stroke: null, filter: null, alpha: 0 },
+      { name: "extMid", fill: 0x044a55, dx: 2, dy: 2, stroke: null, filter: null, alpha: 0 },
+      { name: "face", fill: cfg.grid_color, dx: 0, dy: 0, stroke: { color: 0x043a4a, width: 3 }, filter: null, alpha: 0 },
+      { name: "core", fill: cfg.grid_bright, dx: 0, dy: 0, stroke: { color: cfg.grid_color, width: 1 }, filter: null, alpha: 0 },
+      { name: "rim", fill: cfg.border_color, dx: -1, dy: -1, stroke: null, filter: null, alpha: 0 },
+    ]
 
-    const base = { fontFamily: "monospace", fontSize: fs, letterSpacing: 8, fill: cfg.grid_color }
-
-    this.glowLayer.text = text
-    this.glowLayer.style = { fontFamily: "monospace", fontSize: fs, letterSpacing: 8, fill: cfg.glow_color }
-    this.glowLayer.anchor.set(0.5)
-    this.glowLayer.position.set(cx, cy)
-    this.glowLayer.alpha = 0
-    this.glowLayer.filters = [this.glowFilter]
-    this.logoContainer.addChild(this.glowLayer)
-
-    this.shadowLayer.text = text
-    this.shadowLayer.style = { ...base, fill: 0x000000 }
-    this.shadowLayer.anchor.set(0.5)
-    this.shadowLayer.position.set(cx + 5, cy + 5)
-    this.shadowLayer.alpha = 0
-    this.logoContainer.addChild(this.shadowLayer)
-
-    this.extDeep.text = text
-    this.extDeep.style = { ...base, fill: 0x022a33 }
-    this.extDeep.anchor.set(0.5)
-    this.extDeep.position.set(cx + 3, cy + 3)
-    this.extDeep.alpha = 0
-    this.logoContainer.addChild(this.extDeep)
-
-    this.extMid.text = text
-    this.extMid.style = { ...base, fill: 0x044a55 }
-    this.extMid.anchor.set(0.5)
-    this.extMid.position.set(cx + 2, cy + 2)
-    this.extMid.alpha = 0
-    this.logoContainer.addChild(this.extMid)
-
-    this.faceLayer.text = text
-    this.faceLayer.style = { ...base, fill: cfg.grid_color, stroke: { color: 0x043a4a, width: 3 } }
-    this.faceLayer.anchor.set(0.5)
-    this.faceLayer.position.set(cx, cy)
-    this.faceLayer.alpha = 0
-    this.logoContainer.addChild(this.faceLayer)
-
-    this.coreLayer.text = text
-    this.coreLayer.style = { ...base, fill: cfg.grid_bright, stroke: { color: cfg.grid_color, width: 1 } }
-    this.coreLayer.anchor.set(0.5)
-    this.coreLayer.position.set(cx, cy)
-    this.coreLayer.alpha = 0
-    this.logoContainer.addChild(this.coreLayer)
-
-    this.rimLayer.text = text
-    this.rimLayer.style = { ...base, fill: cfg.border_color }
-    this.rimLayer.anchor.set(0.5)
-    this.rimLayer.position.set(cx - 1, cy - 1)
-    this.rimLayer.alpha = 0
-    this.logoContainer.addChild(this.rimLayer)
+    for (const layer of layers) {
+      const arr: Text[] = []
+      for (let i = 0; i < 11; i++) {
+        const t = new Text({
+          text: text[i],
+          style: {
+            fontFamily: "monospace",
+            fontSize: fs,
+            fill: layer.fill,
+            stroke: layer.stroke ?? undefined,
+          },
+        })
+        t.anchor.set(0.5)
+        t.position.set(startX + i * charW + layer.dx, cy + layer.dy)
+        t.alpha = layer.alpha
+        if (layer.filter) t.filters = [layer.filter]
+        this.logoContainer.addChild(t)
+        arr.push(t)
+      }
+      if (layer.name === "glow") this.glowChars = arr
+      else if (layer.name === "shadow") this.shadowChars = arr
+      else if (layer.name === "extDeep") this.extDeepChars = arr
+      else if (layer.name === "extMid") this.extMidChars = arr
+      else if (layer.name === "face") this.faceChars = arr
+      else if (layer.name === "core") this.coreChars = arr
+      else if (layer.name === "rim") this.rimChars = arr
+    }
   }
 
   private drawPrompt(cfg: GameplayConfig, cs: number): void {
@@ -243,7 +325,15 @@ export class TitleScene implements Scene {
 
   update(_dt: number): void {
     this.noiseFilter.seed = Math.random()
+    this.logoNoise.seed = Math.random()
     this.animateLogo()
+    this.updateBanner()
+    this.updateFgBanner()
+    this.updateBannerHover()
+    this.updateFgHover()
+    this.updateRampCells()
+    this.updateFgRampCells()
+    this.updateCharGlitch()
     this.updateGlitch()
     this.updateCursor()
 
@@ -258,15 +348,138 @@ export class TitleScene implements Scene {
     this.animFrame++
     const f = this.animFrame
 
-    this.shadowLayer.alpha = f < 4 ? (f / 4) * 0.4 : 0.4
-    this.extDeep.alpha = f < 8 ? Math.max(0, (f - 4) / 4) : 1
-    this.extMid.alpha = f < 12 ? Math.max(0, (f - 8) / 4) : 1
-    this.faceLayer.alpha = f < 16 ? Math.max(0, (f - 12) / 4) : 1
-    this.coreLayer.alpha = f < 20 ? Math.max(0, (f - 16) / 4) * 0.8 : 0.8
-    this.rimLayer.alpha = f < 24 ? Math.max(0, (f - 20) / 4) * 0.45 : 0.45
-    this.glowLayer.alpha = f < 30 ? Math.max(0, (f - 22) / 8) * 0.2 : 0.2
+    function setAlpha(arr: Text[], a: number) { for (const t of arr) t.alpha = a }
+
+    setAlpha(this.shadowChars, f < 4 ? (f / 4) * 0.4 : 0.4)
+    setAlpha(this.extDeepChars, f < 8 ? Math.max(0, (f - 4) / 4) : 1)
+    setAlpha(this.extMidChars, f < 12 ? Math.max(0, (f - 8) / 4) : 1)
+    setAlpha(this.faceChars, f < 16 ? Math.max(0, (f - 12) / 4) : 1)
+    setAlpha(this.coreChars, f < 20 ? Math.max(0, (f - 16) / 4) * 0.8 : 0.8)
+    setAlpha(this.rimChars, f < 24 ? Math.max(0, (f - 20) / 4) * 0.45 : 0.45)
+    setAlpha(this.glowChars, f < 30 ? Math.max(0, (f - 22) / 8) * 0.2 : 0.2)
 
     if (f >= 30) this.animating = false
+  }
+
+  private updateBanner(): void {
+    this.bannerTick++
+    if (this.bannerTick < 5) return
+    this.bannerTick = 0
+    this.bannerPhase++
+    this.updateBannerCells(this.bannerPhase, getConfig().grid_color)
+    this.bannerGrid.render()
+    this.bannerGrid.setAllAlpha(TitleScene.BANNER_BASE_ALPHA)
+  }
+
+  private updateBannerHover(): void {
+    const mx = this.input.mouse.x - this.screenLeft
+    const my = this.input.mouse.y - this.screenTop
+    const col = Math.floor(mx / this.bannerCellSize)
+    const row = Math.floor(my / this.bannerCellSize)
+
+    const key = `${row},${col}`
+    const onGrid = row >= 0 && row < 22 && col >= 0 && col < 50
+
+    if (onGrid) {
+      if (!this.rampCells.has(key)) {
+        this.rampCells.set(key, { cur: TitleScene.BANNER_BASE_ALPHA, tgt: TitleScene.BANNER_HOVER_ALPHA })
+      } else {
+        const c = this.rampCells.get(key)!
+        c.tgt = TitleScene.BANNER_HOVER_ALPHA
+      }
+    }
+
+    for (const [k, c] of this.rampCells) {
+      if (k === key) continue
+      c.tgt = TitleScene.BANNER_BASE_ALPHA
+    }
+  }
+
+  private updateRampCells(): void {
+    for (const [key, c] of this.rampCells) {
+      if (Math.abs(c.cur - c.tgt) < 0.001) {
+        c.cur = c.tgt
+        this.rampCells.delete(key)
+        continue
+      }
+      const up = c.tgt > c.cur
+      const rate = up ? TitleScene.RAMP_UP : TitleScene.RAMP_DOWN
+      c.cur += up ? rate : -rate
+      if ((up && c.cur > c.tgt) || (!up && c.cur < c.tgt)) c.cur = c.tgt
+      const [r, co] = key.split(",")
+      this.bannerGrid.setCellAlpha(Number(r), Number(co), c.cur)
+    }
+  }
+
+  private updateFgBanner(): void {
+    this.fgTick++
+    if (this.fgTick < 5) return
+    this.fgTick = 0
+    this.fgPhase++
+    this.updateFgCells(this.fgPhase, getConfig().grid_color)
+    this.fgGrid.render()
+    this.fgGrid.setAllAlpha(TitleScene.BANNER_BASE_ALPHA * 0.5)
+  }
+
+  private updateFgHover(): void {
+    const mx = this.input.mouse.x - this.screenLeft
+    const my = this.input.mouse.y - this.screenTop
+    const col = Math.floor(mx / this.bannerCellSize)
+    const row = Math.floor(my / this.bannerCellSize)
+    const key = `${row},${col}`
+    const onGrid = row >= 0 && row < 22 && col >= 0 && col < 50
+
+    if (onGrid) {
+      if (!this.fgRampCells.has(key)) {
+        this.fgRampCells.set(key, { cur: TitleScene.BANNER_BASE_ALPHA * 0.5, tgt: TitleScene.BANNER_HOVER_ALPHA * 0.6 })
+      } else {
+        this.fgRampCells.get(key)!.tgt = TitleScene.BANNER_HOVER_ALPHA * 0.6
+      }
+    }
+    for (const [k, c] of this.fgRampCells) {
+      if (k === key) continue
+      c.tgt = TitleScene.BANNER_BASE_ALPHA * 0.5
+    }
+  }
+
+  private updateFgRampCells(): void {
+    for (const [key, c] of this.fgRampCells) {
+      if (Math.abs(c.cur - c.tgt) < 0.001) {
+        c.cur = c.tgt
+        this.fgRampCells.delete(key)
+        continue
+      }
+      const up = c.tgt > c.cur
+      const rate = up ? TitleScene.RAMP_UP * 0.5 : TitleScene.RAMP_DOWN * 0.5
+      c.cur += up ? rate : -rate
+      if ((up && c.cur > c.tgt) || (!up && c.cur < c.tgt)) c.cur = c.tgt
+      const [r, co] = key.split(",")
+      this.fgGrid.setCellAlpha(Number(r), Number(co), c.cur)
+    }
+  }
+
+  private updateCharGlitch(): void {
+    const chars = "TIC TAC TOE"
+    const vars = TitleScene.GLITCH_VARIANTS
+    for (let i = 0; i < 11; i++) {
+      const s = this.charStates[i]
+      if (s.corrupt) {
+        if (++s.age > 2) {
+          s.corrupt = false
+          this.faceChars[i].text = chars[i]
+        }
+      } else {
+        if (++s.timer > 200 + Math.random() * 400) {
+          s.timer = 0
+          s.corrupt = true
+          s.age = 0
+          const pool = vars[chars[i]]
+          if (pool) {
+            this.faceChars[i].text = pool[Math.floor(Math.random() * pool.length)]
+          }
+        }
+      }
+    }
   }
 
   private updateGlitch(): void {
@@ -292,13 +505,11 @@ export class TitleScene implements Scene {
 
       for (let n = 0; n < 4 + Math.floor(Math.random() * 3); n++) {
         const ci = 2 + Math.floor(Math.random() * Math.min(hdrLen, 42))
-        const ch = gc[Math.floor(Math.random() * gc.length)]
-        this.ansiGrid.setChar(0, ci, ch, cfg.glow_color)
+        this.ansiGrid.setChar(0, ci, gc[Math.floor(Math.random() * gc.length)], cfg.glow_color)
       }
       for (let n = 0; n < 3 + Math.floor(Math.random() * 3); n++) {
         const ci = 2 + Math.floor(Math.random() * Math.min(ftrLen, 42))
-        const ch = gc[Math.floor(Math.random() * gc.length)]
-        this.ansiGrid.setChar(21, ci, ch, cfg.glow_color)
+        this.ansiGrid.setChar(21, ci, gc[Math.floor(Math.random() * gc.length)], cfg.glow_color)
       }
 
       this.ansiGrid.render()
