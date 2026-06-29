@@ -4,9 +4,6 @@
   "private": true,
   "description": "POWR Terminal — WarGames-style tic-tac-toe on a Cold War CRT terminal. PixiJS v8 + TypeScript.",
   "type": "module",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -18,7 +15,7 @@
     "export-graph": "tsx tools/graph-viewer/export-graph.ts"
   },
   "dependencies": {
-    "@automagically/narrative-core": "*",
+    "@automagically/narrative-core": "file:packages/narrative-core",
     "howler": "^2.2.4",
     "jsfxr": "^1.4.1",
     "pixi.js": "^8.19.0",
