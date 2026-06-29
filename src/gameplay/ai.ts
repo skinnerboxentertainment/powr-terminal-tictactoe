@@ -3,7 +3,7 @@ import { TicTacToeState, type Player } from "./tic-tac-toe-state"
 export function getBestMove(state: TicTacToeState, aiPlayer: Player): number | null {
   const humanPlayer: Player = aiPlayer === "X" ? "O" : "X"
   let bestScore = -Infinity
-  let bestMove: number | null = null
+  let bestMoves: number[] = []
   const validMoves = state.getValidMoves()
 
   for (const move of validMoves) {
@@ -14,10 +14,14 @@ export function getBestMove(state: TicTacToeState, aiPlayer: Player): number | n
     const score = minimax(clone, 0, false, -Infinity, Infinity, aiPlayer, humanPlayer)
     if (score > bestScore) {
       bestScore = score
-      bestMove = move
+      bestMoves = [move]
+    } else if (score === bestScore) {
+      bestMoves.push(move)
     }
   }
-  return bestMove
+
+  if (bestMoves.length === 0) return null
+  return bestMoves[Math.floor(Math.random() * bestMoves.length)]
 }
 
 function minimax(

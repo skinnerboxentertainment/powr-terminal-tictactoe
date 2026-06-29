@@ -64,25 +64,6 @@ function defaultParams(): SfxParams {
 }
 
 const SFX_PRESETS: Record<string, Partial<SfxParams>> = {
-  win: {
-    wave_type: 0,
-    p_base_freq: 0.5,
-    p_freq_ramp: 0.3,
-    p_env_attack: 0.001,
-    p_env_sustain: 0.05,
-    p_env_decay: 0.15,
-    p_repeat_speed: 0.3,
-    sound_vol: 0.3,
-  },
-  draw: {
-    wave_type: 3,
-    p_base_freq: 0.25,
-    p_freq_ramp: 0,
-    p_env_attack: 0.001,
-    p_env_sustain: 0.03,
-    p_env_decay: 0.2,
-    sound_vol: 0.2,
-  },
 }
 
 function generateHowl(overrides: Partial<SfxParams>): Howl {
@@ -102,17 +83,19 @@ export class AudioManager implements IAudioManager {
   private _sounds = new Map<string, Howl>()
   private _music: Howl | null = null
   private _musicPlaying = false
+  private _typeLoop: Howl | null = null
+  private _typeLoopPlaying = false
 
   init(): void {
     if (this._ready) return
 
     const fileKeys = ["place_x", "place_o"]
     for (const key of fileKeys) {
-      const sound = new Howl({
-        src: [`assets/audio/sfx/${key}.ogg`, `assets/audio/sfx/${key}.mp3`],
-        volume: 0.3,
-        onloaderror: () => {},
-      })
+    const sound = new Howl({
+      src: [`assets/audio/sfx/${key}.ogg`, `assets/audio/sfx/${key}.mp3`],
+      volume: 0.3,
+      onloaderror: () => {},
+    })
       this._sounds.set(key, sound)
     }
 
@@ -123,11 +106,30 @@ export class AudioManager implements IAudioManager {
       onloaderror: () => {},
     })
 
+    this._typeLoop = new Howl({
+      src: ["assets/audio/sfx/terminal_loop.ogg"],
+      loop: true,
+      volume: 0.15,
+      onloaderror: () => {},
+    })
+
     for (const [key, preset] of Object.entries(SFX_PRESETS)) {
       this._sounds.set(key, generateHowl(preset))
     }
 
     this._ready = true
+  }
+
+  startTypingLoop(): void {
+    if (this._typeLoop && !this._typeLoopPlaying) {
+      this._typeLoop.play()
+      this._typeLoopPlaying = true
+    }
+  }
+
+  stopTypingLoop(): void {
+    this._typeLoop?.stop()
+    this._typeLoopPlaying = false
   }
 
   playMusic(key: string): void {
@@ -147,6 +149,8 @@ export class AudioManager implements IAudioManager {
   stopAll(): void {
     this._music?.stop()
     this._musicPlaying = false
+    this._typeLoop?.stop()
+    this._typeLoopPlaying = false
     for (const sound of this._sounds.values()) {
       sound.stop()
     }

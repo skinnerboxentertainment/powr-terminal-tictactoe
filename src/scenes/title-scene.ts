@@ -5,6 +5,7 @@ import type { InputManager as InputManagerType } from "../core/input-manager"
 import { getConfig, type GameplayConfig } from "../core/config"
 import { audioManager } from "../audio/audio-manager"
 import { TerminalGrid } from "../core/terminal-grid"
+import { sessionStats } from "../core/session-stats"
 import { GameScene } from "./game-scene"
 import { SimulationScene } from "./simulation-scene"
 
@@ -20,6 +21,7 @@ export class TitleScene implements Scene {
   private screenG = new Graphics()
   private scanlineG = new Graphics()
   private vignetteG = new Graphics()
+  private fullNoiseBg = new Graphics()
 
   private ansiGrid = new TerminalGrid(50, 22)
   private promptText = new Text({ text: "", style: { fontFamily: "monospace", fontSize: 16, fill: 0x00b7c7 } })
@@ -61,12 +63,14 @@ export class TitleScene implements Scene {
   private headerStr = ""
   private footerStr = ""
   private bannerCellSize = 0
+  private footerCellSize = 0
+  private lastFooterCell = -1
   private keyBuffer = ""
   private rampCells = new Map<string, { cur: number; tgt: number }>()
-  private static RAMP_UP = 0.04
-  private static RAMP_DOWN = 0.002
-  private static BANNER_BASE_ALPHA = 0.08
-  private static BANNER_HOVER_ALPHA = 0.8
+  private static RAMP_UP = 0.06
+  private static RAMP_DOWN = 0.0008
+  private static BANNER_BASE_ALPHA = 0.12
+  private static BANNER_HOVER_ALPHA = 1.0
   private static GLITCH_CHARS = "╪╬╫╨╥┴┬├┤┼╡╢╖╕╣║═╔╗╚╝░▒▓█"
   private static LOGO_TEXT = "TIC TAC TOE"
   private static GLITCH_VARIANTS: Record<string, string[]> = {
@@ -94,6 +98,7 @@ export class TitleScene implements Scene {
     this.container.addChild(this.housingG)
     this.container.addChild(this.screenG)
     this.container.addChild(this.screenContent)
+    this.screenContent.addChild(this.fullNoiseBg)
     this.screenContent.addChild(this.scanlineG)
     this.screenContent.addChild(this.ansiGrid.container)
     this.screenContent.addChild(this.logoContainer)
@@ -136,6 +141,10 @@ export class TitleScene implements Scene {
     this.screenRight = cx + cs * cfg.screen_inset_right
     this.screenBottom = cy + cs * cfg.screen_inset_bottom
 
+    this.fullNoiseBg.clear()
+    this.fullNoiseBg.rect(0, 0, sw, sh)
+    this.fullNoiseBg.fill({ color: cfg.screen_color })
+
     this.drawHousing(cfg, cx, cy, cs)
     this.drawScreenFill(cfg)
     this.drawTerminalFrame(cfg, cs)
@@ -143,6 +152,7 @@ export class TitleScene implements Scene {
     this.drawFgBanner(cfg)
     this.drawLogo(cfg, cs)
     this.drawPrompt(cfg, cs)
+    this.drawStatusPanel(cfg, cx, cy, cs)
     this.drawScanlines(cfg)
     this.drawVignette(cfg, cx, cy, cs)
   }
@@ -151,7 +161,7 @@ export class TitleScene implements Scene {
     const g = this.housingG
     g.clear()
     g.rect(cx, cy, cs, cs)
-    g.fill({ color: cfg.housing_color })
+    g.fill({ color: cfg.screen_color })
     const bi = cs * 0.02
     g.rect(cx + bi, cy + bi, cs - bi * 2, cs - bi * 2)
     g.fill({ color: cfg.bezel_color })
@@ -182,7 +192,7 @@ export class TitleScene implements Scene {
     this.bannerGrid.render()
     this.bannerGrid.setAllAlpha(TitleScene.BANNER_BASE_ALPHA)
     this.bannerGrid.container.alpha = 1
-    this.screenContent.addChildAt(this.bannerGrid.container, 0)
+    this.screenContent.addChildAt(this.bannerGrid.container, 1)
   }
 
   private drawFgBanner(cfg: GameplayConfig): void {
@@ -225,6 +235,7 @@ export class TitleScene implements Scene {
     const sw = this.screenRight - this.screenLeft
     const sh = this.screenBottom - this.screenTop
     const cellSize = Math.min(sw / 50, sh / 22)
+    this.footerCellSize = cellSize
     grid.setCellSize(cellSize, cellSize)
     grid.setPosition(this.screenLeft, this.screenTop)
     grid.clear()
@@ -235,7 +246,7 @@ export class TitleScene implements Scene {
     for (let r = 1; r < h - 1; r++) { grid.setChar(r, 0, "│", cfg.grid_color); grid.setChar(r, w - 1, "│", cfg.grid_color) }
     grid.fillRect(h - 1, 0, 1, w, "─", cfg.grid_color)
     grid.setChar(h - 1, 0, "└", cfg.grid_color); grid.setChar(h - 1, w - 1, "┘", cfg.grid_color)
-    this.headerStr = `WOPR v1.0  │  SIMULATION: TIC-TAC-TOE  │  NODE 01`
+    this.headerStr = `WOPR v1.0  │  SKINNERBOX ENTERTAINMENT  │  NODE 01`
     this.footerStr = `CMD>   CELL _  │  LN 12 COL 24  │  ONLINE`
     grid.setText(0, 2, this.headerStr, cfg.glow_color)
     grid.setText(h - 1, 2, this.footerStr, cfg.glow_color)
@@ -306,6 +317,44 @@ export class TitleScene implements Scene {
     this.subtitleText.position.set(this.promptText.x, this.promptText.y + cs * 0.04)
   }
 
+  private drawStatusPanel(cfg: GameplayConfig, cx: number, cy: number, cs: number): void {
+    const panelY = this.screenBottom
+    const panelH = (cy + cs) - panelY
+    const g = new Graphics()
+    g.rect(cx, panelY, cs, panelH)
+    g.fill({ color: cfg.screen_color })
+    this.container.addChildAt(g, 0)
+
+    const centers = [0.12, 0.38, 0.63, 0.89]
+    const labels = ["MOVE", "X WIN", "O WIN", "DRAW"]
+    const vals = [
+      String(sessionStats.moveCount).padStart(4, "0"),
+      String(sessionStats.xWins).padStart(4, "0"),
+      String(sessionStats.oWins).padStart(4, "0"),
+      String(sessionStats.draws).padStart(4, "0"),
+    ]
+    const labelSize = Math.max(8, cs * 0.022)
+    const valueSize = Math.max(10, cs * 0.034)
+
+    for (let i = 0; i < 4; i++) {
+      const lab = new Text({
+        text: labels[i],
+        style: { fontFamily: "monospace", fontSize: labelSize, fill: cfg.status_label_color, letterSpacing: 1 },
+      })
+      lab.anchor.set(0.5, 0)
+      lab.position.set(cx + cs * centers[i], panelY + cs * 0.012)
+      this.container.addChild(lab)
+
+      const val = new Text({
+        text: vals[i],
+        style: { fontFamily: "monospace", fontSize: valueSize, fill: cfg.status_number_color, letterSpacing: 2 },
+      })
+      val.anchor.set(0.5, 0)
+      val.position.set(cx + cs * centers[i], panelY + cs * 0.034)
+      this.container.addChild(val)
+    }
+  }
+
   private drawScanlines(cfg: GameplayConfig): void {
     const g = this.scanlineG
     g.clear()
@@ -318,11 +367,8 @@ export class TitleScene implements Scene {
   private drawVignette(cfg: GameplayConfig, cx: number, cy: number, cs: number): void {
     const g = this.vignetteG
     g.clear()
-    const ew = cs * 0.08; const a = cfg.vignette_strength * 0.5
-    g.rect(cx, cy, cs, ew); g.fill({ color: 0x000000, alpha: a })
-    g.rect(cx, cy + cs - ew, cs, ew); g.fill({ color: 0x000000, alpha: a })
-    g.rect(cx, cy, ew, cs); g.fill({ color: 0x000000, alpha: a })
-    g.rect(cx + cs - ew, cy, ew, cs); g.fill({ color: 0x000000, alpha: a })
+    g.rect(cx, cy, cs, cs)
+    g.fill({ color: 0x000000, alpha: cfg.vignette_strength * 0.08 })
   }
 
   update(_dt: number): void {
@@ -338,6 +384,7 @@ export class TitleScene implements Scene {
     this.updateCharGlitch()
     this.updateGlitch()
     this.updateCursor()
+    this.updateFooterPos()
 
     for (const k of this.input.keysJustPressed) {
       if (k.startsWith("Key") && k.length === 4) {
@@ -353,7 +400,7 @@ export class TitleScene implements Scene {
 
     if (this.input.mouse.leftClicked) {
       this.input.mouse.leftClicked = false
-      this.sceneManager.replace(new GameScene(this.app, this.stage, this.input))
+      this.sceneManager.replace(new GameScene(this.app, this.stage, this.sceneManager, this.input))
     }
   }
 
@@ -539,6 +586,25 @@ export class TitleScene implements Scene {
       this.cursorVisible = !this.cursorVisible
       this.cursorText.alpha = this.cursorVisible ? 1 : 0
     }
+  }
+
+  private updateFooterPos(): void {
+    const mx = this.input.mouse.x - this.screenLeft
+    const my = this.input.mouse.y - this.screenTop
+    const col = Math.floor(mx / this.footerCellSize)
+    const row = Math.floor(my / this.footerCellSize)
+    const cell = row * 50 + col
+    if (cell === this.lastFooterCell) return
+    this.lastFooterCell = cell
+
+    if (row >= 0 && row < 22 && col >= 0 && col < 50) {
+      this.footerStr = `CMD>   CELL _  │  LN ${String(row + 1).padStart(2, "0")} COL ${String(col + 1).padStart(2, "0")}  │  ONLINE`
+    } else {
+      this.footerStr = `CMD>   CELL _  │  LN -- COL --  │  ONLINE`
+    }
+    this.ansiGrid.setText(21, 2, this.footerStr, getConfig().glow_color)
+    this.ansiGrid.markDirty()
+    this.ansiGrid.render()
   }
 
   exit(): void {

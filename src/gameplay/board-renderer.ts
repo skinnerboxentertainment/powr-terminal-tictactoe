@@ -1,11 +1,14 @@
 import { Container, Graphics, Text, NoiseFilter, Rectangle } from "pixi.js"
 import { getConfig, type GameplayConfig } from "../core/config"
+import { TerminalGrid } from "../core/terminal-grid"
+import { noise2D } from "../core/simplex-noise"
+import { audioManager } from "../audio/audio-manager"
 import type { TicTacToeState } from "./tic-tac-toe-state"
 
 export interface StatusValues {
   moveCount: number
   xWins: number
-  currentTurn: string
+  oWins: number
   draws: number
   labels?: [string, string, string, string]
 }
@@ -14,6 +17,7 @@ export class BoardRenderer {
   readonly container = new Container()
   readonly screenContent = new Container()
   private noiseFilter = new NoiseFilter({ noise: 0.06, seed: 0 })
+  private fullNoiseBg = new Graphics()
 
   private housingG = new Graphics()
   private screenG = new Graphics()
@@ -30,8 +34,10 @@ export class BoardRenderer {
   private overlayTyping = false
   private overlayCharIndex = 0
   private overlayTick = 0
-  private overlayFullText = "GAME OVER. AGAIN?"
+  private overlayFullText = "GAME OVER.\nAGAIN?"
   private static OVERLAY_TYPING_DELAY = 3
+  private overlayPause = 0
+  private overlayBlink = false
 
   private statusLabels: Text[] = []
   private statusValues: Text[] = []
@@ -56,6 +62,7 @@ export class BoardRenderer {
     this.screenContent.filters = [this.noiseFilter]
     this.container.addChild(this.housingG)
     this.container.addChild(this.screenContent)
+    this.screenContent.addChild(this.fullNoiseBg)
     this.screenContent.addChild(this.screenG)
     this.screenContent.addChild(this.gridG)
     this.screenContent.addChild(this.marksG)
@@ -93,11 +100,11 @@ export class BoardRenderer {
     this.cellH = (this.gridBottom - this.gridTop) / cfg.grid_size
     this.gridExt = cs * cfg.grid_line_extension
 
-    this.screenContent.filterArea = new Rectangle(
-      this.screenLeft, this.screenTop,
-      this.screenRight - this.screenLeft,
-      this.screenBottom - this.screenTop,
-    )
+    this.screenContent.filterArea = new Rectangle(0, 0, screenWidth, screenHeight)
+
+    this.fullNoiseBg.clear()
+    this.fullNoiseBg.rect(0, 0, screenWidth, screenHeight)
+    this.fullNoiseBg.fill({ color: cfg.screen_color })
 
     this.drawHousing(cfg, cx, cy, cs)
     this.drawScreenFill(cfg, cx, cy, cs)
@@ -118,7 +125,7 @@ export class BoardRenderer {
     g.clear()
 
     g.rect(cx, cy, cs, cs)
-    g.fill({ color: cfg.housing_color })
+    g.fill({ color: cfg.screen_color })
 
     const bezelInset = cs * 0.02
     g.rect(cx + bezelInset, cy + bezelInset, cs - bezelInset * 2, cs - bezelInset * 2)
@@ -197,22 +204,8 @@ export class BoardRenderer {
   private drawVignette(cfg: GameplayConfig, cx: number, cy: number, cs: number): void {
     const g = this.vignetteG
     g.clear()
-
-    const v = cfg.vignette_strength
-    const edgeW = cs * 0.08
-    const alpha = v * 0.5
-
-    g.rect(cx, cy, cs, edgeW)
-    g.fill({ color: 0x000000, alpha })
-    g.rect(cx, cy + cs - edgeW, cs, edgeW)
-    g.fill({ color: 0x000000, alpha })
-    g.rect(cx, cy, edgeW, cs)
-    g.fill({ color: 0x000000, alpha })
-    g.rect(cx + cs - edgeW, cy, edgeW, cs)
-    g.fill({ color: 0x000000, alpha })
-
-    g.rect(cx + edgeW, cy + edgeW, cs - edgeW * 2, cs - edgeW * 2)
-    g.fill({ color: 0x000000, alpha: v * 0.08 })
+    g.rect(cx, cy, cs, cs)
+    g.fill({ color: 0x000000, alpha: cfg.vignette_strength * 0.08 })
   }
 
   private drawStatusPanel(cfg: GameplayConfig, cx: number, cy: number, cs: number): void {
@@ -221,10 +214,10 @@ export class BoardRenderer {
     const panelY = this.screenBottom
     const panelH = (cy + cs) - panelY
     const centers = [0.12, 0.38, 0.63, 0.89]
-    const labels = ["GNR STS", "APL STS", "EOT STS", "PAC STS"]
+    const labels = ["MOVE", "X WIN", "O WIN", "DRAW"]
 
     this.statusBg.rect(cx, panelY, cs, panelH)
-    this.statusBg.fill({ color: cfg.housing_color })
+    this.statusBg.fill({ color: cfg.screen_color })
 
     const labelSize = Math.max(8, cs * 0.022)
     const valueSize = Math.max(10, cs * 0.034)
@@ -321,7 +314,7 @@ export class BoardRenderer {
 
     this.statusValues[0].text = String(values.moveCount).padStart(4, "0")
     this.statusValues[1].text = String(values.xWins).padStart(4, "0")
-    this.statusValues[2].text = values.currentTurn
+    this.statusValues[2].text = String(values.oWins).padStart(4, "0")
     this.statusValues[3].text = String(values.draws).padStart(4, "0")
 
     for (let i = 0; i < 4; i++) {
@@ -331,28 +324,67 @@ export class BoardRenderer {
 
   showOverlay(visible: boolean): void {
     if (visible) {
-      this.overlayText.text = ""
+      this.overlayText.text = "█"
       this.overlayTyping = true
       this.overlayCharIndex = 0
       this.overlayTick = 0
       this.overlayText.alpha = 1
+      audioManager.startTypingLoop()
     } else {
       this.overlayText.alpha = 0
       this.overlayTyping = false
+      audioManager.stopTypingLoop()
     }
   }
 
   tickOverlay(): boolean {
-    if (!this.overlayTyping) return false
+    if (!this.overlayTyping) {
+      if (this.overlayCharIndex < this.overlayFullText.length) return false
+      this.overlayTick++
+      if (this.overlayTick >= 30) {
+        this.overlayTick = 0
+        this.overlayBlink = !this.overlayBlink
+        this.overlayText.text = this.overlayBlink
+          ? this.overlayFullText
+          : this.overlayFullText.slice(0, -1)
+      }
+      return false
+    }
+
+    if (this.overlayPause > 0) {
+      this.overlayPause--
+      if (this.overlayPause <= 0) {
+        this.overlayCharIndex++
+        this.overlayText.text = this.overlayFullText.slice(0, this.overlayCharIndex) + "█"
+        if (this.overlayCharIndex >= this.overlayFullText.length) {
+          this.overlayText.text = this.overlayFullText
+          this.overlayTyping = false
+          audioManager.stopTypingLoop()
+          return false
+        }
+      }
+      return true
+    }
+
     this.overlayTick++
     if (this.overlayTick >= BoardRenderer.OVERLAY_TYPING_DELAY) {
       this.overlayTick = 0
+
+      if (this.overlayFullText[this.overlayCharIndex] === "\n") {
+        this.overlayCharIndex++
+        this.overlayText.text = this.overlayFullText.slice(0, this.overlayCharIndex) + "█"
+        this.overlayPause = 30
+        return true
+      }
+
       this.overlayCharIndex++
+      this.overlayText.text = this.overlayFullText.slice(0, this.overlayCharIndex) + "█"
       if (this.overlayCharIndex >= this.overlayFullText.length) {
+        this.overlayText.text = this.overlayFullText
         this.overlayTyping = false
+        audioManager.stopTypingLoop()
         return false
       }
-      this.overlayText.text = this.overlayFullText.slice(0, this.overlayCharIndex)
     }
     return this.overlayTyping
   }
@@ -360,6 +392,11 @@ export class BoardRenderer {
   setNoise(noise: number): void {
     this.noiseFilter.noise = noise
   }
+
+  getScreenLeft(): number { return this.screenLeft }
+  getScreenTop(): number { return this.screenTop }
+  getScreenRight(): number { return this.screenRight }
+  getScreenBottom(): number { return this.screenBottom }
 
   getCellAt(screenX: number, screenY: number): { row: number; col: number } | null {
     if (screenX < this.gridLeft || screenX > this.gridRight) return null

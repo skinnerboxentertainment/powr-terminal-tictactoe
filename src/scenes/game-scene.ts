@@ -1,5 +1,6 @@
 import { Container, type Application } from "pixi.js"
 import type { Scene } from "../core/types"
+import type { SceneManager } from "../core/scene-manager"
 import type { InputManager as InputManagerType } from "../core/input-manager"
 import { getConfig } from "../core/config"
 import { audioManager } from "../audio/audio-manager"
@@ -7,11 +8,14 @@ import { TicTacToeState } from "../gameplay/tic-tac-toe-state"
 import { getBestMove } from "../gameplay/ai"
 import { BoardRenderer } from "../gameplay/board-renderer"
 import type { StatusValues } from "../gameplay/board-renderer"
+import { sessionStats } from "../core/session-stats"
+import { TitleScene } from "./title-scene"
 
 export class GameScene implements Scene {
   private container = new Container()
   private app: Application
   private stage: Container
+  private sceneManager: SceneManager
   private input: InputManagerType
   private state = new TicTacToeState()
   private renderer = new BoardRenderer()
@@ -19,16 +23,13 @@ export class GameScene implements Scene {
   private gameOver = false
   private gameOverTimer = 0
   private gameOverClicked = false
+  private gameOverLinger = 0
   private gameResult: "win" | "draw" | null = null
 
-  private moveCount = 0
-  private xWins = 0
-  private oWins = 0
-  private draws = 0
-
-  constructor(app: Application, stage: Container, input: InputManagerType) {
+  constructor(app: Application, stage: Container, sceneManager: SceneManager, input: InputManagerType) {
     this.app = app
     this.stage = stage
+    this.sceneManager = sceneManager
     this.input = input
   }
 
@@ -39,11 +40,8 @@ export class GameScene implements Scene {
     this.gameOverTimer = 0
     this.gameOverClicked = false
     this.gameResult = null
+    this.gameOverLinger = 0
     this.aiThinkTimer = 0
-    this.moveCount = 0
-    this.xWins = 0
-    this.oWins = 0
-    this.draws = 0
 
     this.renderer = new BoardRenderer()
     this.container.addChild(this.renderer.container)
@@ -62,21 +60,26 @@ export class GameScene implements Scene {
       this.gameOverTimer++
       const cfg = getConfig()
       if (this.gameOverTimer >= cfg.game_over_delay_frames) {
-        if (this.gameOverTimer === cfg.game_over_delay_frames && this.gameResult) {
-          audioManager.playSfx(this.gameResult)
+        if (this.gameOverTimer === cfg.game_over_delay_frames) {
           this.renderer.showOverlay(true)
         }
         const typing = this.renderer.tickOverlay()
-        if (!typing && this.input.mouse.leftClicked) {
-          this.input.mouse.leftClicked = false
-          this.gameOverClicked = true
-          this.renderer.showOverlay(false)
-          this.state.reset()
-          this.gameOver = false
-          this.gameOverTimer = 0
-          this.aiThinkTimer = 0
-          this.renderer.update(this.state)
-          this.pushStatus()
+        if (!typing) {
+          this.gameOverLinger++
+          if (this.input.mouse.leftClicked) {
+            this.input.mouse.leftClicked = false
+            this.gameOverClicked = true
+            this.renderer.showOverlay(false)
+            this.state.reset()
+            this.gameOver = false
+            this.gameOverTimer = 0
+            this.gameOverLinger = 0
+            this.aiThinkTimer = 0
+            this.renderer.update(this.state)
+            this.pushStatus()
+          } else if (this.gameOverLinger >= 480) {
+            this.sceneManager.replace(new TitleScene(this.app, this.stage, this.sceneManager, this.input))
+          }
         }
       }
       return
@@ -94,7 +97,7 @@ export class GameScene implements Scene {
         if (cell) {
           const index = cell.row * 3 + cell.col
           if (this.state.makeMove(index)) {
-            this.moveCount++
+            sessionStats.moveCount++
             audioManager.playSfx("place_x")
             this.renderer.update(this.state)
             this.pushStatus()
@@ -112,7 +115,7 @@ export class GameScene implements Scene {
         const move = getBestMove(this.state, "O")
         if (move !== null) {
           this.state.makeMove(move)
-          this.moveCount++
+          sessionStats.moveCount++
           audioManager.playSfx("place_o")
           this.renderer.update(this.state)
           this.pushStatus()
@@ -126,11 +129,15 @@ export class GameScene implements Scene {
 
   private finishGame(): void {
     if (this.state.status === "won") {
-      if (this.state.winner === "X") this.xWins++
-      else this.oWins++
-      this.gameResult = "win"
+      if (this.state.winner === "X") {
+        sessionStats.xWins++
+        this.gameResult = "win"
+      } else {
+        sessionStats.oWins++
+        this.gameResult = null
+      }
     } else {
-      this.draws++
+      sessionStats.draws++
       this.gameResult = "draw"
     }
     this.renderer.update(this.state)
@@ -142,10 +149,10 @@ export class GameScene implements Scene {
 
   private pushStatus(): void {
     const values: StatusValues = {
-      moveCount: this.moveCount,
-      xWins: this.xWins,
-      currentTurn: this.state.status === "playing" ? this.state.currentPlayer : "-",
-      draws: this.draws,
+      moveCount: sessionStats.moveCount,
+      xWins: sessionStats.xWins,
+      oWins: sessionStats.oWins,
+      draws: sessionStats.draws,
     }
     this.renderer.setStatusValues(values)
   }
