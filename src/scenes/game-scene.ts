@@ -64,9 +64,10 @@ export class GameScene implements Scene {
       if (this.gameOverTimer >= cfg.game_over_delay_frames) {
         if (this.gameOverTimer === cfg.game_over_delay_frames && this.gameResult) {
           audioManager.playSfx(this.gameResult)
+          this.renderer.showOverlay(true)
         }
-        this.renderer.showOverlay(true)
-        if (this.input.mouse.leftClicked) {
+        const typing = this.renderer.tickOverlay()
+        if (!typing && this.input.mouse.leftClicked) {
           this.input.mouse.leftClicked = false
           this.gameOverClicked = true
           this.renderer.showOverlay(false)

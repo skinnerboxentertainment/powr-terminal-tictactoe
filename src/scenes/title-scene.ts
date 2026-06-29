@@ -6,6 +6,7 @@ import { getConfig, type GameplayConfig } from "../core/config"
 import { audioManager } from "../audio/audio-manager"
 import { TerminalGrid } from "../core/terminal-grid"
 import { GameScene } from "./game-scene"
+import { SimulationScene } from "./simulation-scene"
 
 export class TitleScene implements Scene {
   private container = new Container()
@@ -60,6 +61,7 @@ export class TitleScene implements Scene {
   private headerStr = ""
   private footerStr = ""
   private bannerCellSize = 0
+  private keyBuffer = ""
   private rampCells = new Map<string, { cur: number; tgt: number }>()
   private static RAMP_UP = 0.04
   private static RAMP_DOWN = 0.002
@@ -336,6 +338,18 @@ export class TitleScene implements Scene {
     this.updateCharGlitch()
     this.updateGlitch()
     this.updateCursor()
+
+    for (const k of this.input.keysJustPressed) {
+      if (k.startsWith("Key") && k.length === 4) {
+        this.keyBuffer += k[3].toLowerCase()
+        if (this.keyBuffer.length > 6) this.keyBuffer = this.keyBuffer.slice(-6)
+        if (this.keyBuffer === "wopr") {
+          this.keyBuffer = ""
+          this.sceneManager.replace(new SimulationScene(this.app, this.stage, this.sceneManager, this.input))
+          return
+        }
+      }
+    }
 
     if (this.input.mouse.leftClicked) {
       this.input.mouse.leftClicked = false

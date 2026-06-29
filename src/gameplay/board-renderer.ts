@@ -7,6 +7,7 @@ export interface StatusValues {
   xWins: number
   currentTurn: string
   draws: number
+  labels?: [string, string, string, string]
 }
 
 export class BoardRenderer {
@@ -26,6 +27,11 @@ export class BoardRenderer {
     text: "",
     style: { fontFamily: "monospace", fontSize: 18, fill: 0x91b9ef },
   })
+  private overlayTyping = false
+  private overlayCharIndex = 0
+  private overlayTick = 0
+  private overlayFullText = "GAME OVER. AGAIN?"
+  private static OVERLAY_TYPING_DELAY = 3
 
   private statusLabels: Text[] = []
   private statusValues: Text[] = []
@@ -100,7 +106,7 @@ export class BoardRenderer {
     this.drawStatusPanel(cfg, cx, cy, cs)
     this.drawVignette(cfg, cx, cy, cs)
 
-    this.overlayText.text = "GAME OVER. AGAIN?"
+    this.overlayText.text = this.overlayFullText[0] || "G"
     this.overlayText.style = { fontFamily: "monospace", fontSize: Math.max(12, cs * 0.032), fill: cfg.grid_color, letterSpacing: 2 }
     this.overlayText.anchor.set(0.5)
     this.overlayText.position.set(cx + cs * 0.5, this.gridBottom + cs * 0.015)
@@ -307,6 +313,12 @@ export class BoardRenderer {
   setStatusValues(values: StatusValues): void {
     const cfg = getConfig()
 
+    if (values.labels) {
+      for (let i = 0; i < 4; i++) {
+        this.statusLabels[i].text = values.labels[i]
+      }
+    }
+
     this.statusValues[0].text = String(values.moveCount).padStart(4, "0")
     this.statusValues[1].text = String(values.xWins).padStart(4, "0")
     this.statusValues[2].text = values.currentTurn
@@ -318,7 +330,35 @@ export class BoardRenderer {
   }
 
   showOverlay(visible: boolean): void {
-    this.overlayText.alpha = visible ? 1 : 0
+    if (visible) {
+      this.overlayText.text = ""
+      this.overlayTyping = true
+      this.overlayCharIndex = 0
+      this.overlayTick = 0
+      this.overlayText.alpha = 1
+    } else {
+      this.overlayText.alpha = 0
+      this.overlayTyping = false
+    }
+  }
+
+  tickOverlay(): boolean {
+    if (!this.overlayTyping) return false
+    this.overlayTick++
+    if (this.overlayTick >= BoardRenderer.OVERLAY_TYPING_DELAY) {
+      this.overlayTick = 0
+      this.overlayCharIndex++
+      if (this.overlayCharIndex >= this.overlayFullText.length) {
+        this.overlayTyping = false
+        return false
+      }
+      this.overlayText.text = this.overlayFullText.slice(0, this.overlayCharIndex)
+    }
+    return this.overlayTyping
+  }
+
+  setNoise(noise: number): void {
+    this.noiseFilter.noise = noise
   }
 
   getCellAt(screenX: number, screenY: number): { row: number; col: number } | null {
