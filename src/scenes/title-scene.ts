@@ -67,7 +67,8 @@ export class TitleScene implements Scene {
   private lastFooterCell = -1
   private creditHovered = false
   private creditAnimFrame = 0
-  private creditCells = Array.from({ length: 24 }, (_, i) => i)
+  private creditCharStates: number[] = []
+  private creditSpeeds: number[] = []
   private creditRow = 0
   private creditCol = 16
   private creditText = "SKINNERBOX ENTERTAINMENT"
@@ -620,6 +621,7 @@ export class TitleScene implements Scene {
     const col = Math.floor(mx / this.footerCellSize)
     const row = Math.floor(my / this.footerCellSize)
     const onCredit = (row === 0 || row === 1) && col >= this.creditCol && col < this.creditCol + this.creditText.length
+    const len = this.creditText.length
 
     if (!onCredit) {
       if (this.creditHovered) {
@@ -636,6 +638,12 @@ export class TitleScene implements Scene {
       this.creditHovered = true
       this.creditAnimFrame = 0
       document.body.style.cursor = "pointer"
+      this.creditSpeeds = []
+      this.creditCharStates = []
+      for (let i = 0; i < len; i++) {
+        this.creditCharStates.push(0)
+        this.creditSpeeds.push(0.008 + Math.random() * 0.025)
+      }
     }
 
     this.creditAnimFrame++
@@ -654,20 +662,22 @@ export class TitleScene implements Scene {
       A: ["A", "4", "@"], M: ["M"],
     }
     const chars = this.creditText.split("")
+    const c1 = cfg.glow_color
+    const c2 = cfg.grid_bright
+    const r1 = (c1 >> 16) & 0xff, g1 = (c1 >> 8) & 0xff, b1 = c1 & 0xff
+    const r2 = (c2 >> 16) & 0xff, g2 = (c2 >> 8) & 0xff, b2 = c2 & 0xff
 
     for (let i = 0; i < chars.length; i++) {
+      this.creditCharStates[i] = Math.min(1, this.creditCharStates[i] + this.creditSpeeds[i])
+      const pct = this.creditCharStates[i]
       const ch = chars[i]
       const pool = leet[ch] || [ch]
-      const showLeet = Math.random() < 0.45
-      const display = showLeet && pool.length > 1 ? pool[Math.floor(Math.random() * pool.length)] : ch
-      const phase = this.creditAnimFrame * 0.04 + i * 0.6
-      const wave = (Math.sin(phase) * 0.5 + 0.5) * 0.5 + 0.5
-      const c1 = cfg.glow_color, c2 = cfg.grid_bright
-      const r = Math.round((((c1 >> 16) & 0xff) + (((c2 >> 16) & 0xff) - ((c1 >> 16) & 0xff)) * wave))
-      const g = Math.round((((c1 >> 8) & 0xff) + (((c2 >> 8) & 0xff) - ((c1 >> 8) & 0xff)) * wave))
-      const b = Math.round(((c1 & 0xff) + ((c2 & 0xff) - (c1 & 0xff)) * wave))
-      const color = (r << 16) | (g << 8) | b
-      this.ansiGrid.setChar(this.creditRow, this.creditCol + i, display, color)
+      const showLeet = pool.length > 1 && Math.random() < pct * 0.5
+      const display = showLeet ? pool[Math.floor(Math.random() * pool.length)] : ch
+      const r = Math.round(r1 + (r2 - r1) * pct)
+      const g = Math.round(g1 + (g2 - g1) * pct)
+      const b = Math.round(b1 + (b2 - b1) * pct)
+      this.ansiGrid.setChar(this.creditRow, this.creditCol + i, display, (r << 16) | (g << 8) | b)
     }
 
     this.ansiGrid.markDirty()
