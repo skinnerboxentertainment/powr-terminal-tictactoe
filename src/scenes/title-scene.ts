@@ -66,9 +66,11 @@ export class TitleScene implements Scene {
   private footerCellSize = 0
   private lastFooterCell = -1
   private creditHovered = false
+  private creditRampingDown = false
   private creditAnimFrame = 0
   private creditCharStates: number[] = []
   private creditSpeeds: number[] = []
+  private creditDownSpeeds: number[] = []
   private creditRow = 0
   private creditCol = 16
   private creditText = "SKINNERBOX ENTERTAINMENT"
@@ -626,16 +628,22 @@ export class TitleScene implements Scene {
     if (!onCredit) {
       if (this.creditHovered) {
         this.creditHovered = false
+        this.creditRampingDown = true
         document.body.style.cursor = "default"
-        this.ansiGrid.setText(0, 2, this.headerStr, getConfig().glow_color)
-        this.ansiGrid.markDirty()
-        this.ansiGrid.render()
+        this.creditDownSpeeds = []
+        for (let i = 0; i < len; i++) {
+          this.creditDownSpeeds.push(0.003 + Math.random() * 0.012)
+        }
+      }
+      if (this.creditRampingDown) {
+        this.renderCreditRampDown()
       }
       return
     }
 
     if (!this.creditHovered) {
       this.creditHovered = true
+      this.creditRampingDown = false
       this.creditAnimFrame = 0
       document.body.style.cursor = "pointer"
       this.creditSpeeds = []
@@ -654,6 +662,26 @@ export class TitleScene implements Scene {
       return
     }
 
+    this.renderCreditFrame(true)
+  }
+
+  private renderCreditRampDown(): void {
+    let anyLit = false
+    const cfg = getConfig()
+    for (let i = 0; i < this.creditCharStates.length; i++) {
+      this.creditCharStates[i] = Math.max(0, this.creditCharStates[i] - this.creditDownSpeeds[i])
+      if (this.creditCharStates[i] > 0) anyLit = true
+    }
+    this.renderCreditFrame(false)
+    if (!anyLit) {
+      this.creditRampingDown = false
+      this.ansiGrid.setText(0, 2, this.headerStr, cfg.glow_color)
+      this.ansiGrid.markDirty()
+      this.ansiGrid.render()
+    }
+  }
+
+  private renderCreditFrame(allowLeet: boolean): void {
     const cfg = getConfig()
     const leet: Record<string, string[]> = {
       S: ["S", "5"], K: ["K"], I: ["I", "1", "!"], N: ["N"],
@@ -662,17 +690,15 @@ export class TitleScene implements Scene {
       A: ["A", "4", "@"], M: ["M"],
     }
     const chars = this.creditText.split("")
-    const c1 = cfg.glow_color
-    const c2 = cfg.grid_bright
+    const c1 = cfg.glow_color, c2 = cfg.grid_bright
     const r1 = (c1 >> 16) & 0xff, g1 = (c1 >> 8) & 0xff, b1 = c1 & 0xff
     const r2 = (c2 >> 16) & 0xff, g2 = (c2 >> 8) & 0xff, b2 = c2 & 0xff
 
     for (let i = 0; i < chars.length; i++) {
-      this.creditCharStates[i] = Math.min(1, this.creditCharStates[i] + this.creditSpeeds[i])
       const pct = this.creditCharStates[i]
       const ch = chars[i]
       const pool = leet[ch] || [ch]
-      const showLeet = pool.length > 1 && Math.random() < pct * 0.5
+      const showLeet = allowLeet && pool.length > 1 && Math.random() < pct * 0.5
       const display = showLeet ? pool[Math.floor(Math.random() * pool.length)] : ch
       const r = Math.round(r1 + (r2 - r1) * pct)
       const g = Math.round(g1 + (g2 - g1) * pct)
