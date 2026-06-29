@@ -77,17 +77,17 @@ export class TitleScene implements Scene {
   private static RAMP_DOWN = 0.0008
   private static BANNER_BASE_ALPHA = 0.12
   private static BANNER_HOVER_ALPHA = 1.0
-  private static GLITCH_CHARS = "╪╬╫╨╥┴┬├┤┼╡╢╖╕╣║═╔╗╚╝░▒▓█"
+  private static GLITCH_CHARS = "Γò¬Γò¼Γò½Γò¿ΓòÑΓö┤Γö¼Γö£ΓöñΓö╝ΓòíΓòóΓòûΓòòΓòúΓòæΓòÉΓòöΓòùΓòÜΓò¥ΓûæΓûÆΓûôΓûê"
   private static LOGO_TEXT = "TIC TAC TOE"
   private static GLITCH_VARIANTS: Record<string, string[]> = {
-    T: ["Ŧ", "Ť", "Ţ", "Ṫ", "Ŧ"],
-    I: ["Ɨ", "Ǐ", "Ĩ", "Ï", "Ḯ"],
-    C: ["Ç", "Ĉ", "Č", "Ċ", "ç"],
-    A: ["À", "Á", "Â", "Ã", "Ä", "Å", "Ă", "Ǎ"],
-    O: ["Ò", "Ó", "Ô", "Õ", "Ö", "Ø", "Ő"],
-    E: ["È", "É", "Ê", "Ë", "Ě", "Ē"],
+    T: ["┼ª", "┼ñ", "┼ó", "ß╣¬", "┼ª"],
+    I: ["╞ù", "╟Å", "─¿", "├Å", "ß╕«"],
+    C: ["├ç", "─ê", "─î", "─è", "├º"],
+    A: ["├Ç", "├ü", "├é", "├â", "├ä", "├à", "─é", "╟ì"],
+    O: ["├Æ", "├ô", "├ö", "├ò", "├û", "├ÿ", "┼É"],
+    E: ["├ê", "├ë", "├è", "├ï", "─Ü", "─Æ"],
   }
-  private static BANNER_CYCLE = "█▓▒░▒▓"
+  private static BANNER_CYCLE = "ΓûêΓûôΓûÆΓûæΓûÆΓûô"
 
   constructor(app: Application, stage: Container, sceneManager: SceneManager, input: InputManagerType) {
     this.app = app
@@ -247,13 +247,13 @@ export class TitleScene implements Scene {
     grid.clear()
 
     const w = 50; const h = 22
-    grid.fillRect(0, 0, 1, w, "─", cfg.grid_color, cfg.screen_color)
-    grid.setChar(0, 0, "┌", cfg.grid_color); grid.setChar(0, w - 1, "┐", cfg.grid_color)
-    for (let r = 1; r < h - 1; r++) { grid.setChar(r, 0, "│", cfg.grid_color); grid.setChar(r, w - 1, "│", cfg.grid_color) }
-    grid.fillRect(h - 1, 0, 1, w, "─", cfg.grid_color)
-    grid.setChar(h - 1, 0, "└", cfg.grid_color); grid.setChar(h - 1, w - 1, "┘", cfg.grid_color)
-    this.headerStr = `POWR v1.0  │  SKINNERBOX ENTERTAINMENT  │  NODE 01`
-    this.footerStr = `CMD>   CELL _  │  LN 12 COL 24  │  ONLINE`
+    grid.fillRect(0, 0, 1, w, "ΓöÇ", cfg.grid_color, cfg.screen_color)
+    grid.setChar(0, 0, "Γöî", cfg.grid_color); grid.setChar(0, w - 1, "ΓöÉ", cfg.grid_color)
+    for (let r = 1; r < h - 1; r++) { grid.setChar(r, 0, "Γöé", cfg.grid_color); grid.setChar(r, w - 1, "Γöé", cfg.grid_color) }
+    grid.fillRect(h - 1, 0, 1, w, "ΓöÇ", cfg.grid_color)
+    grid.setChar(h - 1, 0, "Γöö", cfg.grid_color); grid.setChar(h - 1, w - 1, "Γöÿ", cfg.grid_color)
+    this.headerStr = `POWR v1.0  Γöé  SKINNERBOX ENTERTAINMENT  Γöé  NODE 01`
+    this.footerStr = `CMD>   CELL _  Γöé  LN 12 COL 24  Γöé  ONLINE`
     grid.setText(0, 2, this.headerStr, cfg.glow_color)
     grid.setText(h - 1, 2, this.footerStr, cfg.glow_color)
     grid.setText(20, 13, this.creditText, cfg.glow_color)
@@ -607,9 +607,9 @@ export class TitleScene implements Scene {
     this.lastFooterCell = cell
 
     if (row >= 0 && row < 22 && col >= 0 && col < 50) {
-      this.footerStr = `CMD>   CELL _  │  LN ${String(row + 1).padStart(2, "0")} COL ${String(col + 1).padStart(2, "0")}  │  ONLINE`
+      this.footerStr = `CMD>   CELL _  Γöé  LN ${String(row + 1).padStart(2, "0")} COL ${String(col + 1).padStart(2, "0")}  Γöé  ONLINE`
     } else {
-      this.footerStr = `CMD>   CELL _  │  LN -- COL --  │  ONLINE`
+      this.footerStr = `CMD>   CELL _  Γöé  LN -- COL --  Γöé  ONLINE`
     }
     this.ansiGrid.setText(21, 2, this.footerStr, getConfig().glow_color)
     this.ansiGrid.markDirty()
@@ -617,14 +617,11 @@ export class TitleScene implements Scene {
   }
 
   private updateCreditHover(): void {
-    const cs = this.footerCellSize
-    const creditX = this.screenLeft + this.creditCol * cs
-    const creditY = this.screenTop + this.creditRow * cs
-    const creditW = this.creditText.length * cs
-    const creditH = cs * 2
-    const mx = this.input.mouse.x
-    const my = this.input.mouse.y
-    const onCredit = mx >= creditX && mx <= creditX + creditW && my >= creditY && my <= creditY + creditH
+    const mx = this.input.mouse.x - this.screenLeft
+    const my = this.input.mouse.y - this.screenTop
+    const col = Math.floor(mx / this.footerCellSize)
+    const row = Math.floor(my / this.footerCellSize)
+    const onCredit = row === this.creditRow && col >= this.creditCol && col < this.creditCol + this.creditText.length
 
     if (!onCredit) {
       if (this.creditHovered) {
