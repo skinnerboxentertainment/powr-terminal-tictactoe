@@ -1,8 +1,8 @@
 {
-  "name": "automagically-built-games",
-  "version": "0.1.0",
+  "name": "powr-terminal-tictactoe",
+  "version": "1.0.0",
   "private": true,
-  "description": "AutoMagically Built Games — browser game built with PixiJS v8 + TypeScript",
+  "description": "POWR Terminal — WarGames-style tic-tac-toe on a Cold War CRT terminal. PixiJS v8 + TypeScript.",
   "type": "module",
   "workspaces": [
     "packages/*"
@@ -22,6 +22,7 @@
     "howler": "^2.2.4",
     "jsfxr": "^1.4.1",
     "pixi.js": "^8.19.0",
+    "playwright": "^1.61.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {

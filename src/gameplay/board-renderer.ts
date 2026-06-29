@@ -116,7 +116,7 @@ export class BoardRenderer {
     this.overlayText.text = this.overlayFullText[0] || "G"
     this.overlayText.style = { fontFamily: "monospace", fontSize: Math.max(12, cs * 0.032), fill: cfg.grid_color, letterSpacing: 2 }
     this.overlayText.anchor.set(0.5)
-    this.overlayText.position.set(cx + cs * 0.5, this.gridBottom + cs * 0.015)
+    this.overlayText.position.set(cx + cs * 0.5, this.gridBottom + cs * 0.05)
     this.overlayText.alpha = 0
   }
 

@@ -246,7 +246,7 @@ export class TitleScene implements Scene {
     for (let r = 1; r < h - 1; r++) { grid.setChar(r, 0, "│", cfg.grid_color); grid.setChar(r, w - 1, "│", cfg.grid_color) }
     grid.fillRect(h - 1, 0, 1, w, "─", cfg.grid_color)
     grid.setChar(h - 1, 0, "└", cfg.grid_color); grid.setChar(h - 1, w - 1, "┘", cfg.grid_color)
-    this.headerStr = `WOPR v1.0  │  SKINNERBOX ENTERTAINMENT  │  NODE 01`
+    this.headerStr = `POWR v1.0  │  SKINNERBOX ENTERTAINMENT  │  NODE 01`
     this.footerStr = `CMD>   CELL _  │  LN 12 COL 24  │  ONLINE`
     grid.setText(0, 2, this.headerStr, cfg.glow_color)
     grid.setText(h - 1, 2, this.footerStr, cfg.glow_color)
@@ -390,7 +390,7 @@ export class TitleScene implements Scene {
       if (k.startsWith("Key") && k.length === 4) {
         this.keyBuffer += k[3].toLowerCase()
         if (this.keyBuffer.length > 6) this.keyBuffer = this.keyBuffer.slice(-6)
-        if (this.keyBuffer === "wopr") {
+        if (this.keyBuffer === "powr") {
           this.keyBuffer = ""
           this.sceneManager.replace(new SimulationScene(this.app, this.stage, this.sceneManager, this.input))
           return
