@@ -1,0 +1,3 @@
+[build]
+  command = "echo 'already built'"
+  publish = "dist"
