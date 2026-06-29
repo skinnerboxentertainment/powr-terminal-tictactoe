@@ -116,6 +116,8 @@ The terminal frame is drawn on a 50×22 TerminalGrid using CP437 characters with
 
 Inspired by the WOPR terminal scene in *WarGames* (1983). Built with [OpenCode](https://opencode.ai) AI agents.
 
+Built on [AutoMagically v0.1.0](https://github.com/skinnerboxentertainment/AutoMagically) — the agentic game development framework for OpenCode. The framework provides the agent architecture, command system, genre pattern templates, and build pipeline that scaffolded this project's foundation.
+
 ## License
 
 MIT License. See [LICENSE](LICENSE) for details.
