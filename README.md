@@ -20,11 +20,12 @@
 ## Screenshots
 
 <p align="center">
-  <img src="screenshots/title-screen.png" width="400" alt="Title screen — POWR terminal frame with extruded logo" />
+  <img src="screenshots/title_screen.gif" width="600" alt="Title screen — POWR terminal frame with extruded logo" />
+  <br />
   <img src="screenshots/gameplay.png" width="400" alt="Gameplay — icy-blue grid with X and O marks" />
+  <img src="screenshots/game-over.png" width="400" alt="Game over overlay" />
   <br />
   <img src="screenshots/simulation.png" width="400" alt="Simulation mode — revealed text" />
-  <img src="screenshots/game-over.png" width="400" alt="Game over overlay" />
 </p>
 
 ## Overview
