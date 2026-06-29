@@ -618,11 +618,14 @@ export class TitleScene implements Scene {
   }
 
   private updateCreditHover(): void {
-    const mx = this.input.mouse.x - this.screenLeft
-    const my = this.input.mouse.y - this.screenTop
-    const col = Math.floor(mx / this.footerCellSize)
-    const row = Math.floor(my / this.footerCellSize)
-    const onCredit = (row === 0 || row === 1) && col >= this.creditCol && col < this.creditCol + this.creditText.length
+    const cs = this.footerCellSize
+    const creditX = this.screenLeft + this.creditCol * cs
+    const creditY = this.screenTop
+    const creditW = this.creditText.length * cs
+    const creditH = cs * 2
+    const mx = this.input.mouse.x
+    const my = this.input.mouse.y
+    const onCredit = mx >= creditX && mx <= creditX + creditW && my >= creditY && my <= creditY + creditH
     const len = this.creditText.length
 
     if (!onCredit) {
