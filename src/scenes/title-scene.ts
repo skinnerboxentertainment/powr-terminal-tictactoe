@@ -68,8 +68,8 @@ export class TitleScene implements Scene {
   private creditHovered = false
   private creditAnimFrame = 0
   private creditCells = Array.from({ length: 24 }, (_, i) => i)
-  private creditRow = 20
-  private creditCol = 13
+  private creditRow = 0
+  private creditCol = 17
   private creditText = "SKINNERBOX ENTERTAINMENT"
   private keyBuffer = ""
   private rampCells = new Map<string, { cur: number; tgt: number }>()
@@ -256,7 +256,6 @@ export class TitleScene implements Scene {
     this.footerStr = `CMD>   CELL _  │  LN 12 COL 24  │  ONLINE`
     grid.setText(0, 2, this.headerStr, cfg.glow_color)
     grid.setText(h - 1, 2, this.footerStr, cfg.glow_color)
-    grid.setText(20, 13, this.creditText, cfg.glow_color)
     grid.render()
   }
 
@@ -560,7 +559,6 @@ export class TitleScene implements Scene {
         this.logoContainer.alpha = 1
         this.ansiGrid.setText(0, 2, this.headerStr, getConfig().glow_color)
         this.ansiGrid.setText(21, 2, this.footerStr, getConfig().glow_color)
-        this.ansiGrid.setText(20, 13, this.creditText, getConfig().glow_color)
         this.ansiGrid.markDirty()
         this.ansiGrid.render()
       }
@@ -621,13 +619,13 @@ export class TitleScene implements Scene {
     const my = this.input.mouse.y - this.screenTop
     const col = Math.floor(mx / this.footerCellSize)
     const row = Math.floor(my / this.footerCellSize)
-    const onCredit = row === this.creditRow && col >= this.creditCol && col < this.creditCol + this.creditText.length
+    const onCredit = (row === 0 || row === 1) && col >= this.creditCol && col < this.creditCol + this.creditText.length
 
     if (!onCredit) {
       if (this.creditHovered) {
         this.creditHovered = false
         document.body.style.cursor = "default"
-        this.ansiGrid.setText(this.creditRow, this.creditCol, this.creditText, getConfig().glow_color)
+        this.ansiGrid.setText(0, 2, this.headerStr, getConfig().glow_color)
         this.ansiGrid.markDirty()
         this.ansiGrid.render()
       }
