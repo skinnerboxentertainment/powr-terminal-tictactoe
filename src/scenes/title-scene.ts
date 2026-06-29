@@ -72,7 +72,7 @@ export class TitleScene implements Scene {
   private creditSpeeds: number[] = []
   private creditDownSpeeds: number[] = []
   private creditRow = 0
-  private creditCol = 16
+  private creditCol = 17
   private creditText = "SKINNERBOX ENTERTAINMENT"
   private keyBuffer = ""
   private rampCells = new Map<string, { cur: number; tgt: number }>()
