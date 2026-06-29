@@ -256,6 +256,7 @@ export class TitleScene implements Scene {
     this.footerStr = `CMD>   CELL _  │  LN 12 COL 24  │  ONLINE`
     grid.setText(0, 2, this.headerStr, cfg.glow_color)
     grid.setText(h - 1, 2, this.footerStr, cfg.glow_color)
+    grid.setText(20, 13, this.creditText, cfg.glow_color)
     grid.render()
   }
 
@@ -559,6 +560,7 @@ export class TitleScene implements Scene {
         this.logoContainer.alpha = 1
         this.ansiGrid.setText(0, 2, this.headerStr, getConfig().glow_color)
         this.ansiGrid.setText(21, 2, this.footerStr, getConfig().glow_color)
+        this.ansiGrid.setText(20, 13, this.creditText, getConfig().glow_color)
         this.ansiGrid.markDirty()
         this.ansiGrid.render()
       }
