@@ -65,6 +65,12 @@ export class TitleScene implements Scene {
   private bannerCellSize = 0
   private footerCellSize = 0
   private lastFooterCell = -1
+  private creditHovered = false
+  private creditAnimFrame = 0
+  private creditCells = Array.from({ length: 24 }, (_, i) => i)
+  private creditRow = 20
+  private creditCol = 13
+  private creditText = "SKINNERBOX ENTERTAINMENT"
   private keyBuffer = ""
   private rampCells = new Map<string, { cur: number; tgt: number }>()
   private static RAMP_UP = 0.06
@@ -385,6 +391,7 @@ export class TitleScene implements Scene {
     this.updateGlitch()
     this.updateCursor()
     this.updateFooterPos()
+    this.updateCreditHover()
 
     for (const k of this.input.keysJustPressed) {
       if (k.startsWith("Key") && k.length === 4) {
@@ -603,6 +610,59 @@ export class TitleScene implements Scene {
       this.footerStr = `CMD>   CELL _  │  LN -- COL --  │  ONLINE`
     }
     this.ansiGrid.setText(21, 2, this.footerStr, getConfig().glow_color)
+    this.ansiGrid.markDirty()
+    this.ansiGrid.render()
+  }
+
+  private updateCreditHover(): void {
+    const mx = this.input.mouse.x - this.screenLeft
+    const my = this.input.mouse.y - this.screenTop
+    const col = Math.floor(mx / this.footerCellSize)
+    const row = Math.floor(my / this.footerCellSize)
+    const onCredit = row === this.creditRow && col >= this.creditCol && col < this.creditCol + this.creditText.length
+
+    if (!onCredit) {
+      if (this.creditHovered) {
+        this.creditHovered = false
+        document.body.style.cursor = "default"
+        this.ansiGrid.setText(this.creditRow, this.creditCol, this.creditText, getConfig().glow_color)
+        this.ansiGrid.markDirty()
+        this.ansiGrid.render()
+      }
+      return
+    }
+
+    if (!this.creditHovered) {
+      this.creditHovered = true
+      this.creditAnimFrame = 0
+      document.body.style.cursor = "pointer"
+    }
+
+    this.creditAnimFrame++
+
+    if (this.input.mouse.leftClicked) {
+      this.input.mouse.leftClicked = false
+      window.open("https://github.com/skinnerboxentertainment/powr-terminal-tictactoe", "_blank")
+      return
+    }
+
+    const cfg = getConfig()
+    const chars = this.creditText.split("")
+    const c1 = cfg.glow_color
+    const c2 = cfg.grid_bright
+    const r1 = (c1 >> 16) & 0xff, g1 = (c1 >> 8) & 0xff, b1 = c1 & 0xff
+    const r2 = (c2 >> 16) & 0xff, g2 = (c2 >> 8) & 0xff, b2 = c2 & 0xff
+
+    for (let i = 0; i < chars.length; i++) {
+      const phase = this.creditAnimFrame * 0.04 + i * 0.6
+      const wave = (Math.sin(phase) * 0.5 + 0.5) * 0.5 + 0.5
+      const r = Math.round(r1 + (r2 - r1) * wave)
+      const g = Math.round(g1 + (g2 - g1) * wave)
+      const b = Math.round(b1 + (b2 - b1) * wave)
+      const color = (r << 16) | (g << 8) | b
+      this.ansiGrid.setChar(this.creditRow, this.creditCol + i, chars[i], color)
+    }
+
     this.ansiGrid.markDirty()
     this.ansiGrid.render()
   }

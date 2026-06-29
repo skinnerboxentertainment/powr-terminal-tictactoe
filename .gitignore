@@ -89,3 +89,6 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 *.lnk
+
+# Netlify
+.netlify/
