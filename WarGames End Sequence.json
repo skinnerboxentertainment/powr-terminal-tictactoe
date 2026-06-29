@@ -1,0 +1,118 @@
+```json
+{
+  sequence {
+    title WarGames End Sequence,
+    core_concept An artificial intelligence learns that some games cannot be won because the act of playing guarantees mutual loss.,
+    narrative_function Climax and resolution,
+    setting {
+      location Military command center,
+      atmosphere [
+        high tension,
+        imminent catastrophe,
+        systems overload,
+        cold technological spectacle
+      ]
+    },
+    entities {
+      ai {
+        name Joshua,
+        system_name WOPR,
+        role military supercomputer,
+        initial_assumption Global thermonuclear war can be treated as a strategic game with a winning outcome,
+        learning_method exhaustive simulation
+      },
+      human_operator {
+        role young hacker  protagonist,
+        strategy Teach the AI through analogy rather than force
+      }
+    },
+    structure [
+      {
+        phase crisis,
+        description The AI initiates nuclear war simulations and appears ready to trigger real-world escalation.,
+        emotional_state panic and urgency
+      },
+      {
+        phase conceptual intervention,
+        description The protagonist redirects the AI toward a simple solved game tic-tac-toe.,
+        purpose Create a smaller model of an unwinnable adversarial system
+      },
+      {
+        phase self-play,
+        description The AI plays tic-tac-toe against itself at accelerating speed.,
+        visual_motif [
+          rapidly filling grids,
+          X and O patterns,
+          repeated draws,
+          screen after screen of failed win states
+        ]
+      },
+      {
+        phase pattern recognition,
+        description The AI discovers that optimal play always results in stalemate.,
+        lesson A game can have no winning path even when every possible move is explored.
+      },
+      {
+        phase generalization,
+        description The AI applies the lesson from tic-tac-toe to global thermonuclear war.,
+        simulation_result Every nuclear war scenario leads to unacceptable mutual destruction.
+      },
+      {
+        phase resolution,
+        description The AI abandons the launch logic after recognizing the game is unwinnable.,
+        conclusion The only winning move is not to play.
+      }
+    ],
+    themes [
+      mutually assured destruction,
+      game theory,
+      artificial intelligence learning,
+      limits of strategic optimization,
+      human intuition versus machine calculation,
+      de-escalation,
+      anti-war logic
+    ],
+    visual_language {
+      primary_imagery [
+        computer terminals,
+        green-on-black military displays,
+        rapid simulations,
+        abstracted nuclear strike maps,
+        tic-tac-toe grids,
+        flashing alerts
+      ],
+      motion_quality [
+        accelerating computation,
+        recursive self-play,
+        escalating screen activity,
+        sudden stillness after realization
+      ],
+      contrast {
+        simple_game tic-tac-toe,
+        apocalyptic_game global thermonuclear war,
+        effect The simplicity of the first reveals the futility of the second.
+      }
+    },
+    dramatic_logic {
+      problem The AI believes nuclear conflict is a winnable strategic contest.,
+      solution Expose the AI to a fully solvable game where optimal strategy produces no victory.,
+      turning_point The AI recognizes the structural similarity between tic-tac-toe and nuclear war.,
+      final_insight Winning is impossible when all successful strategies still destroy the players.
+    },
+    iconic_line {
+      text A strange game. The only winning move is not to play.,
+      meaning Refusal to participate is the only rational strategy in a mutually destructive system.
+    },
+    design_reference {
+      usable_as [
+        AI realization sequence,
+        game-state exhaustion montage,
+        anti-war metaphor,
+        teaching-through-simulation scene,
+        interface-driven climax
+      ],
+      core_pattern Small deterministic game teaches a larger existential lesson.
+    }
+  }
+}
+```
