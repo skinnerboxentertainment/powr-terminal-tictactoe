@@ -647,20 +647,27 @@ export class TitleScene implements Scene {
     }
 
     const cfg = getConfig()
+    const leet: Record<string, string[]> = {
+      S: ["S", "5"], K: ["K"], I: ["I", "1", "!"], N: ["N"],
+      E: ["E", "3", "€"], R: ["R"], B: ["B", "8"],
+      O: ["O", "0"], X: ["X"], T: ["T", "7"],
+      A: ["A", "4", "@"], M: ["M"],
+    }
     const chars = this.creditText.split("")
-    const c1 = cfg.glow_color
-    const c2 = cfg.grid_bright
-    const r1 = (c1 >> 16) & 0xff, g1 = (c1 >> 8) & 0xff, b1 = c1 & 0xff
-    const r2 = (c2 >> 16) & 0xff, g2 = (c2 >> 8) & 0xff, b2 = c2 & 0xff
 
     for (let i = 0; i < chars.length; i++) {
+      const ch = chars[i]
+      const pool = leet[ch] || [ch]
+      const showLeet = Math.random() < 0.45
+      const display = showLeet && pool.length > 1 ? pool[Math.floor(Math.random() * pool.length)] : ch
       const phase = this.creditAnimFrame * 0.04 + i * 0.6
       const wave = (Math.sin(phase) * 0.5 + 0.5) * 0.5 + 0.5
-      const r = Math.round(r1 + (r2 - r1) * wave)
-      const g = Math.round(g1 + (g2 - g1) * wave)
-      const b = Math.round(b1 + (b2 - b1) * wave)
+      const c1 = cfg.glow_color, c2 = cfg.grid_bright
+      const r = Math.round((((c1 >> 16) & 0xff) + (((c2 >> 16) & 0xff) - ((c1 >> 16) & 0xff)) * wave))
+      const g = Math.round((((c1 >> 8) & 0xff) + (((c2 >> 8) & 0xff) - ((c1 >> 8) & 0xff)) * wave))
+      const b = Math.round(((c1 & 0xff) + ((c2 & 0xff) - (c1 & 0xff)) * wave))
       const color = (r << 16) | (g << 8) | b
-      this.ansiGrid.setChar(this.creditRow, this.creditCol + i, chars[i], color)
+      this.ansiGrid.setChar(this.creditRow, this.creditCol + i, display, color)
     }
 
     this.ansiGrid.markDirty()
